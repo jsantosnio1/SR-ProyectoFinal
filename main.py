@@ -363,15 +363,28 @@ def getData():
         #for x in data_company:
             #x[0]=nombre columna
             #x[1]=valor
-
-
         getTweet(sigla)
         convertToCSV(sigla)
+        
 
     thread= Thread(target=getDatas)
     thread.start()
 
     return render_template("nasdaq_response/ok.html")
+
+@app.route("/predictCompany")
+def predict():
+    sigla="INTC"+".csv"
+    ruta_data_accions="HistoricalData_1637979637603.csv"
+    predict=predictByData(ruta_data_accions)
+    sentimientos=analysisBySentiments(sigla+'.csv')
+
+    return render_template("final_predict.html",predict=predict,sentimientos=sentimientos)
+    """
+        """
+
+
+
 
 def getTweet(sigla):
     import tweet_collector
@@ -379,7 +392,7 @@ def getTweet(sigla):
     tweet_collector.setArgs(sigla)
     tweet_collector.run()
 def convertToCSV(sigla):
-    csvWriter = csv.writer(open('/downloads/'+sigla+'.csv', 'w',newline='',encoding='utf-8'))
+    csvWriter = csv.writer(open(sigla+'.csv', 'w',newline='',encoding='utf-8'))
     conn = sqlite3.connect(sigla+'_2021-11-24-2021-11-25.db')
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM Tweet")
