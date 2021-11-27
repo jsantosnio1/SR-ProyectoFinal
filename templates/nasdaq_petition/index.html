@@ -1,0 +1,62 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <title> Request company </title>
+</head>
+<style>
+   .loader-background {
+    width: 100%;
+    height: 100%;
+    position: relative; /* Cambiamos de absolute a relative */
+    background-color: #fff;
+    z-index: 9999;
+}
+
+.loader{
+  border: 16px solid #d4d4d4;
+  border-top: 16px solid #3498db;
+  border-bottom: 16px solid #3498db;
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  animation: spin 1.5s linear infinite;
+  margin-top: 15%!important;
+  margin-left: 45%!important;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+<body>
+    
+    <div class="loader-background">
+        <div class="loader"></div>
+        <h1 style="text-align: center!important; color: grey;">Loading</h1>
+    </div>
+    <div id="content">
+        <form method="post" action="/search" enctype="multipart/form-data">
+            <b>Input the name of company that u want to search</b><br>
+            <input type="text" name="company_name" id="company_name">
+            <button type="submit" onclick="loading();">Buscar</button>
+        </form>
+    </div>
+    
+    <script type="text/javascript">
+        window.onload=$(".loader-background").hide();
+        function loading(){
+            $(".loader-background").show();
+            $("#content").hide();
+        }
+    </script>
+</body>
+</html>

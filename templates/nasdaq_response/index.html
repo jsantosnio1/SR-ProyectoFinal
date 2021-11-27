@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <title> Document </title>
+</head>
+<body>
+
+    <table class="table table-light">
+        <thead class="thead-light">
+            <tr>
+                <th>Nombre</th>
+                <th>Sigla</th>
+                <th style="display: none;">Link</th>
+                <th>Seleccionar</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for object in response %}
+            <tr>
+                    <td> <input type="text" name="name_{{ object[1] }}" id="name_{{ object[1] }}" value="{{ object[0] }}" style="display: none;"> {{ object[0] }}</td>
+                    <td> <input type="text" name="cod_{{ object[1] }}" id="cod_{{ object[1] }}" value="{{ object[1] }}" style="display: none;"> {{ object[1] }}</td>
+                    <td style="display: none;"> <input type="text" name="url_{{ object[1] }}" id="url_{{ object[1] }}" value="{{ object[2] }}"> </td>
+                    <td><input type="checkbox" name="select" id="select_{{ object[1] }}" value="{{ object[1] }}" onClick="ckChange(this)"></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <form action="/selectData" method="post">
+        <input type="text" style="display: none;" required name="url" id="url">
+        <input type="text" style="display: none;" name="sigla" id="sigla" required >
+        <input type="text" style="display: none;" name="nombre" id="nombre" required >
+        <button type="submit">Seleccionar</button>
+    </form>
+    <script>
+        function ckChange(ckType){
+            var ckName = document.getElementsByName(ckType.name);
+            var checked = document.getElementById(ckType.id);
+            var val= checked.value;
+
+            console.log("url_"+val);
+
+            if (checked.checked) {
+              for(var i=0; i < ckName.length; i++){
+        
+                  if(!ckName[i].checked){
+                      ckName[i].disabled = true;
+                  }else{
+                      ckName[i].disabled = false;
+                      document.getElementById("url").value=document.getElementById("url_"+val).value;
+                      document.getElementById("sigla").value=document.getElementById("cod_"+val).value;
+                      document.getElementById("nombre").value=document.getElementById("name_"+val).value;
+                  }
+              } 
+            }
+            else {
+              for(var i=0; i < ckName.length; i++){
+                ckName[i].disabled = false;
+              }
+              document.getElementById("sigla").value="";
+            }    
+        }
+
+    </script>
+   
+</html>
