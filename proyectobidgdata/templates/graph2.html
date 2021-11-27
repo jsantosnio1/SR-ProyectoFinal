@@ -1,0 +1,13 @@
+{% extends 'layout.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<!DOCTYPE html>
+<html>
+<title> Plot</title>
+<body>
+<img src="data:image/png;base64, {{ plot_url }}">
+</body>
+</html>
+{% endblock %}
