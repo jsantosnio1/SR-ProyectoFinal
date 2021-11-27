@@ -8,27 +8,28 @@
     <table class="table table-striped table-hover table-bordered table-sm bg-white">
       <thead>
         <tr>
-          <td>ID</td>
-          <td>Username</td>
-          <td>Password</td>
-          <td>Email</td>
-          <td>Operations</td>
+          <th>ID</th>
+          <th>Username</th>
+          <th>Password</th>
+          <th>Email</th>
+          <th>Operations</th>
         </tr>
       </thead>
       <tbody>
-
-         <tr>
+         {% for account in accounts %}
           <tr>
-            <td>{{ account['id']}}</td>
-            <td>{{ account['username'] }}</td>
-            <td>{{ account['password'] }}</td>
-            <td>{{ account['email'] }}</td>
-            <td>
-            <a  class="btn btn-secondary">Edit</a>
-            <a  class="btn btn-danger btn-delete">Delete</a>
+            <td>{{ accounts['id_usuario']}}</td>
+            <td>{{ accounts['nombre_usuario'] }}</td>
+            <td>{{ accounts['apellido_usuario'] }}</td>
+            <td>{{ accounts['email'] }}</td>
+            <td>{{ accounts['Operations'] }}</td>
+            <td>{{ account[5] }}</td>
+
+            <td><a  class="btn btn-secondary">Edit</a>
+            <a  class="btn btn-danger btn-delete">Delete</a></td>
           </td>
         </tr>
-        
+        {% endfor %}
       </tbody>
     </table>
   </div>

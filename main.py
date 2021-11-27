@@ -1,5 +1,4 @@
 from flask import Flask,redirect,render_template,request,url_for, session
-from flaskext.mysql import MySQL
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 import time
@@ -19,7 +18,7 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.keys import Keys
 
 app=Flask(__name__)
-
+app.secret_key = 'your secret key'
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
@@ -31,16 +30,18 @@ def login():
         username = request.form['username']
         password = request.form['password']
         # Check if account exists using MySQL
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM accounts WHERE username = %s AND password = %s', (username, password,))
+        db = getMysqlConnection()
+        cur = db.cursor(dictionary=True)
+        cur.execute('SELECT * FROM usuario WHERE nick_name_usuario = %s AND password_usuario = %s', (username, password,))
         # Fetch one record and return result
-        account = cursor.fetchone()
+        account = cur.fetchone()
+        print(account)
         # If account exists in accounts table in out database
         if account:
             # Create session data, we can access this data in other routes
             session['loggedin'] = True
-            session['id'] = account['id']
-            session['username'] = account['username']
+            session['id'] = int (account['id_usuario'])
+            session['username'] = account['nick_name_usuario']
             # Redirect to home page
             return redirect(url_for('home'))
         else:
@@ -51,7 +52,7 @@ def login():
 
 
 @app.route('/request',methods=['GET','POST'])
-def request():
+def requestCompany():
     return render_template('nasdaq_petition/index.html')
 
 @app.route('/logout')
@@ -73,9 +74,10 @@ def register():
         username = request.form['username']
         password = request.form['password']
         email = request.form['email']
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM accounts WHERE username = %s', (username,))
-        account = cursor.fetchone()
+        db = getMysqlConnection()
+        cur = db.cursor(dictionary=True)
+        cur.execute('SELECT * FROM accounts WHERE username = %s', (username,))
+        account = cur.fetchone()
         #If account exists show error and validation checks
         if account:
             msg = 'Account already exists!'
@@ -87,7 +89,7 @@ def register():
             msg = 'Please fill out the form!'
         else:
             # Account doesnt exists and the form data is valid, now insert new account into accounts table
-            cursor.execute('INSERT INTO accounts VALUES (NULL, %s, %s, %s)', (username, password, email,))
+            cur.execute('INSERT INTO accounts VALUES (NULL, %s, %s, %s)', (username, password, email,))
             mysql.connection.commit()
             msg = 'You have successfully registered!'
     return render_template('register.html', msg=msg)
@@ -106,9 +108,10 @@ def profile():
     # Check if user is loggedin
     if 'loggedin' in session:
         # We need all the account info for the user so we can display it on the profile page
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM accounts WHERE id = %s', (session['id'],))
-        account = cursor.fetchone()
+        db = getMysqlConnection()
+        cur = db.cursor(dictionary=True)
+        cur.execute('SELECT * FROM accounts WHERE id = %s', (session['id'],))
+        account = cur.fetchone()
         # Show the profile page with account info
         return render_template('profile.html', account=account)
     # User is not loggedin redirect to login page
@@ -119,11 +122,12 @@ def data():
     # Check if user is loggedin
     if 'loggedin' in session:
         # We need all the account info for the user so we can display it on the profile page
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM accounts')
-        account = cursor.fetchone()
+        db = getMysqlConnection()
+        cur = db.cursor()
+        cur.execute('SELECT * FROM usuario')
+        account = cur.fetchone()
         # Show the profile page with account info
-        return render_template('data.html', account=account)
+        return render_template('data.html', accounts=account)
     # User is not loggedin redirect to login page
 
 @app.route('/graph')    
@@ -153,7 +157,7 @@ def getMysqlConnection():
     return mysql.connector.connect(host='sistemasderecomendacion.mysql.database.azure.com',
                                    database='sr',
                                    user='sistemasderecomendacion',
-                                   password='m2AyGl6&NRCc')
+                                   password='m2AyGl6&NRCc',)
 
 @app.route('/getMySQL')
 def index():  # put application's code here
