@@ -51,7 +51,7 @@ def login():
     return render_template('index.html', msg=msg)
 
 
-@app.route('/request',methods=['GET','POST'])
+@app.route('/requestCompany',methods=['GET','POST'])
 def requestCompany():
     return render_template('nasdaq_petition/index.html')
 
