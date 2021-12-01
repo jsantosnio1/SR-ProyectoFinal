@@ -125,9 +125,11 @@ def data():
         db = getMysqlConnection()
         cur = db.cursor()
         cur.execute('SELECT * FROM usuario')
-        account = cur.fetchone()
+        accounts = cur.fetchall()
+        print(accounts)
+        db.commit()
         # Show the profile page with account info
-        return render_template('data.html', accounts=account)
+        return render_template('data.html', accounts=accounts)
     # User is not loggedin redirect to login page
 
 @app.route('/graph')    
@@ -173,9 +175,20 @@ def index():  # put application's code here
 def destroy(id):
     conn = getMysqlConnection()
     cur = conn.cursor()
-    cur.execute("DELETE FROM persona where id=%s",(id))
+    cur.execute("DELETE FROM usuario where id=%s",(id))
     conn.commit()
     return redirect('/')
+
+@app.route('/edit/<int:id>')
+def edit(id):
+    conn = getMysqlConnection()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM usuario where id=%s",(id))
+    usuarios = cur.fetchall()
+    conn.commit()
+    print(usuarios)
+    return redirect('/edit.html',usuarios=usuarios)
+
 
 @app.route('/create')
 def create():  # put application's code here
@@ -363,6 +376,21 @@ def getData():
         #for x in data_company:
             #x[0]=nombre columna
             #x[1]=valor
+
+        db = getMysqlConnection()
+        cur = db.cursor()
+        cur.execute('INSERT INTO empresa VALUES (NULL, %s, %s, %s)', (, ,,))
+        print "Registro Insertados Correctamente"
+
+        try:
+            cur.execute()
+            db.commit()
+
+        except:
+            print
+            "No se Guardaron los Registros"
+            db.rollback()
+
         getTweet(sigla)
         convertToCSV(sigla)
         

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Usuario</title>
+</head>
+<body>
+{% for usuario in usuarios %}
+    <form method="post" action="/store" enctype="multipart/form-data">
+        ID:
+        <input type="text" value="{[usuario[0]}" name="txtNombre" id="txtNombre">
+        <br>
+        Name:
+        <input type="text" value="{[usuario[1]}" name="txtApellido" id="txtApellido">
+        <br>
+        Password:
+        <input type="text" value="{[usuario[2]}" name="txtCorreo" id="txtCorreo">
+        <br>
+        Empleado:
+        <input type="text" value="{[usuario[4]}" name="txtNumero" id="txtNumero">
+        <br>
+        <input type="submit" value="Cambiar">
+
+    </form>
+{%end for%}
+</body>
+</html>
