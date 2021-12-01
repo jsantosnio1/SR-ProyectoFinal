@@ -16,7 +16,7 @@ import re
 import io
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.keys import Keys
-
+from prediction.predictionstockmarket import predictDataSet
 app=Flask(__name__)
 app.secret_key = 'your secret key'
 
@@ -376,14 +376,11 @@ def getData():
 def predict():
     sigla="INTC"+".csv"
     ruta_data_accions="HistoricalData_1637979637603.csv"
-    predict=predictByData(ruta_data_accions)
-    sentimientos=analysisBySentiments(sigla+'.csv')
+    predict=predictDataSet(ruta_data_accions)
+    #sentimientos=analysisBySentiments(sigla+'.csv')
+    sentimientos=""
 
     return render_template("final_predict.html",predict=predict,sentimientos=sentimientos)
-    """
-        """
-
-
 
 
 def getTweet(sigla):
