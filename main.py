@@ -213,6 +213,7 @@ def storage():
 
 @app.route('/search',methods=['POST'])
 def search():
+    
     _company_name=request.form['company_name']
 
     _company_name = _company_name.replace(" ","%20")
