@@ -9,7 +9,7 @@
       <thead>
         <tr>
           <th>ID</th>
-          <th>Username</th>
+          <th>Name</th>
           <th>Password</th>
           <th>Email</th>
           <th>Operations</th>
@@ -17,16 +17,13 @@
       </thead>
       <tbody>
          {% for account in accounts %}
-          <tr>
-            <td>{{ accounts['id_usuario']}}</td>
-            <td>{{ accounts['nombre_usuario'] }}</td>
-            <td>{{ accounts['apellido_usuario'] }}</td>
-            <td>{{ accounts['email'] }}</td>
-            <td>{{ accounts['Operations'] }}</td>
-            <td>{{ account[5] }}</td>
-
-            <td><a  class="btn btn-secondary">Edit</a>
-            <a  class="btn btn-danger btn-delete">Delete</a></td>
+        <tr>
+            <td>{{ account[0] }}</td>
+            <td>{{ account[1] }}</td>
+            <td>{{ account[2] }}</td>
+            <td>{{ account[4] }}</td>
+            <td><a href="/edit/{{ account[0] }}"> Edit</a> |
+                <a onclick="return confirm('Desea eliminar la persona?')" class="btn btn-danger" href="/destroy/{{account[0]}}">Delete</a> </td>
           </td>
         </tr>
         {% endfor %}

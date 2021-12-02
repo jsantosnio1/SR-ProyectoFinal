@@ -16,7 +16,7 @@ import re
 import io
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.keys import Keys
-from prediction.predictionstockmarket import predictDataSet
+#from prediction.predictionstockmarket import predictDataSet
 app=Flask(__name__)
 app.secret_key = 'your secret key'
 
@@ -125,9 +125,11 @@ def data():
         db = getMysqlConnection()
         cur = db.cursor()
         cur.execute('SELECT * FROM usuario')
-        account = cur.fetchone()
+        accounts = cur.fetchall()
+        print(accounts)
+        db.commit()
         # Show the profile page with account info
-        return render_template('data.html', accounts=account)
+        return render_template('data.html', accounts=accounts)
     # User is not loggedin redirect to login page
 
 @app.route('/graph')    
@@ -173,9 +175,20 @@ def index():  # put application's code here
 def destroy(id):
     conn = getMysqlConnection()
     cur = conn.cursor()
-    cur.execute("DELETE FROM persona where id=%s",(id))
+    cur.execute("DELETE FROM usuario where id=%s",(id))
     conn.commit()
     return redirect('/')
+
+@app.route('/edit/<int:id>')
+def edit(id):
+    conn = getMysqlConnection()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM usuario where id=%s",(id))
+    usuarios = cur.fetchall()
+    conn.commit()
+    print(usuarios)
+    return redirect('/edit.html',usuarios=usuarios)
+
 
 @app.route('/create')
 def create():  # put application's code here
@@ -359,10 +372,49 @@ def getData():
         list_of_files = glob.glob(filename+"\*") # * means all if need specific format then *.csv
         latest_file = max(list_of_files, key=os.path.getctime)#save id,empresa, sigla, latest_file
         print(latest_file)
-        print(data_company)#guardar data empresa
-        #for x in data_company:
-            #x[0]=nombre columna
-            #x[1]=valor
+        #print(data_company)#guardar data empresa
+        exchange = data_company[0][1]
+        sector = data_company [1][1]
+        industry = data_company [2][1]
+        year = data_company[3][1]
+        today = data_company[4][1]
+        share = data_company[5][1]
+        average = data_company[6][1]
+        previous = data_company[7][1]
+        week = data_company[8][1]
+        market = data_company[9][1]
+        ratio = data_company[10][1]
+        forward = data_company[11][1]
+        earnings = data_company[12][1]
+        annualized = data_company[13][1]
+        dividend = data_company[14][1]
+        dividendp = data_company[15][1]
+        current = data_company[16][1]
+        beta = data_company[17][1]
+        print('Exchange   ' + exchange)
+        print('Sector   ' + sector)
+        print('Industry   ' + industry)
+        print('1 Year Target   ' + year)
+        print('Today   ' + today)
+        print('Share Volume   ' + share)
+        print('Average Volume  ' + average)
+        print('Previous Close  ' + previous)
+        print('52 Week High/Low  ' + week)
+        print('Market Cap  ' + market)
+        print('P/E Ratio  ' + ratio)
+        print('Forward P/E 1 Yr. ' + forward)
+        print('Earnings Per Share(EPS)  ' + earnings)
+        print('Annualized Dividend  ' + annualized)
+        print('Ex Dividend Date  ' + dividend)
+        print('Dividend Pay Date  ' + dividendp)
+        print('Current Yield ' + current)
+        print('Beta  ' + beta)
+        conn = getMysqlConnection()
+        cur = conn.cursor()
+        sql = 'INSERT INTO empresa (nombre_empresa,sigla_empresa,exchange,sector,industry,year_target,today,share_volume,average_volume,previous_close,h_week,market_cap,ratio,forward,earnings,annualized_dividend,dividen_date,dividen_pay,current_yield,estado_empresa,beta) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+        val = (empresa,sigla,exchange, sector, industry ,year ,today ,share ,average ,previous ,week ,market,ratio ,forward,earnings,annualized,dividend,dividendp,current,'activo',beta)
+        cur.execute(sql, val)
+        conn.commit()
         getTweet(sigla)
         convertToCSV(sigla)
         
