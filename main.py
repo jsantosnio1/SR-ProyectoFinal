@@ -16,7 +16,7 @@ import re
 import io
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.keys import Keys
-#from prediction.predictionstockmarket import predictDataSet
+from prediction.predictionstockmarket import predictDataSet
 app=Flask(__name__)
 app.secret_key = 'your secret key'
 
