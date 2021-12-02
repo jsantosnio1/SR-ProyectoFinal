@@ -1,4 +1,6 @@
 from flask import Flask,redirect,render_template,request,url_for, session
+from flask_cors import CORS, cross_origin
+from flask import send_file
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 import time
@@ -17,6 +19,9 @@ import io
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.keys import Keys
 from prediction.predictionstockmarket import predictDataSet
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
 app=Flask(__name__)
 app.secret_key = 'your secret key'
 
@@ -423,6 +428,32 @@ def getData():
     thread.start()
 
     return render_template("nasdaq_response/ok.html")
+
+@app.route('/cc',methods=['GET','POST'])
+@cross_origin()
+def cc():
+    return render_template('company.html')
+
+@app.route('/getPlotCSV') # this is a job for GET, not POST
+def plot_csv():
+    return send_file('downloads/a.csv',
+                     mimetype='text/csv',
+                     attachment_filename='a.csv',
+                     as_attachment=True)
+
+@app.route('/getPlotCSS') # this is a job for GET, not POST
+def plot_css():
+    return send_file('templates/custom.css',
+                     mimetype='text/css',
+                     attachment_filename='custom.css',
+                     as_attachment=True)
+
+@app.route('/getB') # this is a job for GET, not POST
+def plot_jpeg():
+    return send_file('templates/business.jpeg',
+                     mimetype='img/jpeg',
+                     attachment_filename='business.jpeg',
+                     as_attachment=True)
 
 @app.route("/predictCompany")
 def predict():
