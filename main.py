@@ -1,5 +1,6 @@
 from flask import Flask,redirect,render_template,request,url_for, session
 from flask_cors import CORS, cross_origin
+from datetime import datetime
 from flask import send_file
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
@@ -19,9 +20,13 @@ import io
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.keys import Keys
 from prediction.predictionstockmarket import predictDataSet
+from sqlalchemy import create_engine
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import linear_kernel
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+
 app=Flask(__name__)
 app.secret_key = 'your secret key'
 
@@ -158,7 +163,149 @@ def find_between( s, first, last ):
     except ValueError:
         return ""
 
+@app.route("/predictContent")
+def byContent():
+    db_connection_str = 'mysql+pymysql://sistemasderecomendacion:m2AyGl6&NRCc@sistemasderecomendacion.mysql.database.azure.com/sr'
+    db_connection = create_engine(db_connection_str)
+    df = pd.read_sql('SELECT nombre_empresa, sector, industry FROM empresa', con=db_connection)
+    #df.drop(['id_empresa','sigla_empresa','name_file','estado_empresa','exchange','dividen_pay','dividen_date',"market_cap"], axis=1, inplace=True)
+    df=df.replace({'\\$':''}, regex=True)
+    df=df.replace({'\\%':''}, regex=True)
+    df=df.replace({'N/A':''}, regex=True)
 
+    columnsString=["nombre_empresa","sector","industry"]
+    df[columnsString]=df[columnsString].astype("string")
+    
+    """columnsToArray=["today","h_week","share_volume","average_volume"]
+
+    for column in columnsToArray:
+        if(column=="today" or column=="h_week"):
+            separator="/"
+        else:
+            separator=","
+
+        df[column] = df[column].apply(lambda x: x.split(separator) if x != '' else [])
+        s = df.apply(lambda x: pd.Series(x[column]),axis=1).stack().reset_index(level=1, drop=True)
+        s.name = column+"_clean"
+        df = df.drop(column, axis=1).join(s)
+
+
+    columnsString=["nombre_empresa","sector","industry"]
+    df[columnsString]=df[columnsString].astype("string")
+    
+    def processCol(col):
+        return col.astype(str).apply(lambda val: val.replace(',','') if val != '' else 0).astype(float)
+
+    num_columns = df.select_dtypes(exclude='string').columns
+    df[num_columns]=df[num_columns].apply(processCol)"""
+
+    vectorizer = TfidfVectorizer(min_df=1, stop_words='english')
+    bag_of_words= vectorizer.fit_transform(df["sector"]+" "+df["industry"])
+    print(bag_of_words.shape)
+    cosine_sim = linear_kernel(bag_of_words, bag_of_words)
+    indices = pd.Series(df.index, index=df['nombre_empresa']).drop_duplicates()
+
+    def content_recommender(top, title, cosine_sim=cosine_sim, df=df, indices=indices):
+        idx = indices[title]
+        sim_scores = list(enumerate(cosine_sim[idx]))
+        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+        sim_scores = sim_scores[1:top+1]
+        companies_indices = [i[0] for i in sim_scores]
+        return df['nombre_empresa'].iloc[companies_indices]
+    
+    print(content_recommender(5,'Intel Corporation Common Stock (INTC)'))
+
+
+    return render_template("index.html")
+
+
+@app.route("/predictByFilter")
+def byFilter():
+    db_connection_str = 'mysql+pymysql://sistemasderecomendacion:m2AyGl6&NRCc@sistemasderecomendacion.mysql.database.azure.com/sr'
+    db_connection = create_engine(db_connection_str)
+    df = pd.read_sql('SELECT nombre_empresa, sector, industry FROM empresa', con=db_connection)
+    #df.drop(['id_empresa','sigla_empresa','name_file','estado_empresa','exchange','dividen_pay','dividen_date',"market_cap"], axis=1, inplace=True)
+    df=df.replace({'\\$':''}, regex=True)
+    df=df.replace({'\\%':''}, regex=True)
+    df=df.replace({'N/A':''}, regex=True)
+
+    columnsString=["nombre_empresa","sector","industry"]
+    df[columnsString]=df[columnsString].astype("string")
+    
+    """columnsToArray=["today","h_week","share_volume","average_volume"]
+
+    for column in columnsToArray:
+        if(column=="today" or column=="h_week"):
+            separator="/"
+        else:
+            separator=","
+
+        df[column] = df[column].apply(lambda x: x.split(separator) if x != '' else [])
+        s = df.apply(lambda x: pd.Series(x[column]),axis=1).stack().reset_index(level=1, drop=True)
+        s.name = column+"_clean"
+        df = df.drop(column, axis=1).join(s)
+
+
+    columnsString=["nombre_empresa","sector","industry"]
+    df[columnsString]=df[columnsString].astype("string")
+    
+    def processCol(col):
+        return col.astype(str).apply(lambda val: val.replace(',','') if val != '' else 0).astype(float)
+
+    num_columns = df.select_dtypes(exclude='string').columns
+    df[num_columns]=df[num_columns].apply(processCol)"""
+
+    vectorizer = TfidfVectorizer(min_df=1, stop_words='english')
+    bag_of_words= vectorizer.fit_transform(df["sector"]+" "+df["industry"])
+    print(bag_of_words.shape)
+    cosine_sim = linear_kernel(bag_of_words, bag_of_words)
+    indices = pd.Series(df.index, index=df['nombre_empresa']).drop_duplicates()
+
+    def content_recommender(top, title, cosine_sim=cosine_sim, df=df, indices=indices):
+        idx = indices[title]
+        sim_scores = list(enumerate(cosine_sim[idx]))
+        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+        sim_scores = sim_scores[1:top+1]
+        companies_indices = [i[0] for i in sim_scores]
+        return df['nombre_empresa'].iloc[companies_indices]
+    
+    print(content_recommender(5,'Intel Corporation Common Stock (INTC)'))
+
+
+    return render_template("index.html")
+
+@app.route("/getCompany/<int:id>")
+def getCompany(id=None):
+    if id != None:
+        sql = "SELECT * from empresa where id_empresa = %s";
+        db = getMysqlConnection()
+        cur = db.cursor(dictionary=True)
+        cur.execute(sql, (id,))
+        company = cur.fetchone()
+        print(company)
+
+    return render_template("company2.html",company=company)
+
+@app.route("/saveBuy",methods=["POST"])
+def saveBuy():
+    id_c=request.form['id_company']
+    now = datetime.now()
+    
+
+    # dd/mm/YY H:M:S
+    fecha = now.strftime("%Y-%m-%d %H:%M:%S")
+    
+    conn = getMysqlConnection()
+    cur = conn.cursor()
+
+
+    sql = 'INSERT INTO acciones (id_empresa,id_usuario,fecha_adquisicion,estado_accion) VALUES (%s,%s,%s,%s)'
+    val = (id_c,session["id"],fecha,"comprada")
+    cur.execute(sql, val)
+    conn.commit()
+    print("llego el id "+id_c)
+
+    return ""
 
 def getMysqlConnection():
     return mysql.connector.connect(host='sistemasderecomendacion.mysql.database.azure.com',
@@ -174,7 +321,7 @@ def index():  # put application's code here
     cur.execute(sqlstr)
     empleados = cur.fetchall()
     print(empleados)
-    return render_template('empresas/index.html',empleados=empleados);
+    return render_template('empresas/index.html',empleados=empleados)
 
 @app.route('/destroy/<int:id>')
 def destroy(id):
@@ -335,8 +482,8 @@ def getData():
         element = driver.find_element(By.CLASS_NAME,'summary-data__header')
         element.location_once_scrolled_into_view
 
-        WebDriverWait(driver,2)
-        time.sleep(2);
+        WebDriverWait(driver,10)
+        time.sleep(10);
 
         titles = driver.find_elements(By.CLASS_NAME,"summary-data__cellheading")
         titles2 = driver.find_elements(By.CLASS_NAME,"summary-data__cell")
@@ -395,33 +542,25 @@ def getData():
         dividend = data_company[14][1]
         dividendp = data_company[15][1]
         current = data_company[16][1]
-        beta = data_company[17][1]
-        print('Exchange   ' + exchange)
-        print('Sector   ' + sector)
-        print('Industry   ' + industry)
-        print('1 Year Target   ' + year)
-        print('Today   ' + today)
-        print('Share Volume   ' + share)
-        print('Average Volume  ' + average)
-        print('Previous Close  ' + previous)
-        print('52 Week High/Low  ' + week)
-        print('Market Cap  ' + market)
-        print('P/E Ratio  ' + ratio)
-        print('Forward P/E 1 Yr. ' + forward)
-        print('Earnings Per Share(EPS)  ' + earnings)
-        print('Annualized Dividend  ' + annualized)
-        print('Ex Dividend Date  ' + dividend)
-        print('Dividend Pay Date  ' + dividendp)
-        print('Current Yield ' + current)
-        print('Beta  ' + beta)
+
+        try:
+            beta = data_company[17][1]
+        except:
+            beta ="N/A"
+        
+
+        name_file=latest_file.split("\\")[-1]
+
+
         conn = getMysqlConnection()
         cur = conn.cursor()
-        sql = 'INSERT INTO empresa (nombre_empresa,sigla_empresa,exchange,sector,industry,year_target,today,share_volume,average_volume,previous_close,h_week,market_cap,ratio,forward,earnings,annualized_dividend,dividen_date,dividen_pay,current_yield,estado_empresa,beta) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
-        val = (empresa,sigla,exchange, sector, industry ,year ,today ,share ,average ,previous ,week ,market,ratio ,forward,earnings,annualized,dividend,dividendp,current,'activo',beta)
+
+        sql = 'INSERT INTO empresa (nombre_empresa,sigla_empresa,name_file,exchange,sector,industry,year_target,today,share_volume,average_volume,previous_close,h_week,market_cap,ratio,forward,earnings,annualized_dividend,dividen_date,dividen_pay,current_yield,estado_empresa,beta) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+        val = (empresa,sigla,name_file,exchange, sector, industry ,year ,today ,share ,average ,previous ,week ,market,ratio ,forward,earnings,annualized,dividend,dividendp,current,'activo',beta)
         cur.execute(sql, val)
         conn.commit()
-        getTweet(sigla)
-        convertToCSV(sigla)
+        #getTweet(sigla)
+        #convertToCSV(sigla)
         
 
     thread= Thread(target=getDatas)
@@ -466,7 +605,6 @@ def predict():
     sentimientos=""
 
     return render_template("final_predict.html",predict=predict,sentimientos=sentimientos)
-
 
 def getTweet(sigla):
     import tweet_collector
