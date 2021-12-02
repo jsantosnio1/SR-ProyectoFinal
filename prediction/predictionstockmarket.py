@@ -18,7 +18,7 @@ from sklearn.metrics import mean_squared_error
 """
 #def predictDataSet(df):
 def predictDataSet():
-    df = pd.read_csv("tsla.us.txt")
+    df = pd.read_csv("C:/Users/JuanK/Documents/GitHub/SR-ProyectoFinal/prediction/tsla.us.txt")
     df.head()
 
     """## ARIMA (AutoRegressive Integrated Moving Average) for Time Series Prediction"""

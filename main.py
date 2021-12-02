@@ -376,7 +376,9 @@ def getData():
 def predict():
     sigla="INTC"+".csv"
     ruta_data_accions="HistoricalData_1637979637603.csv"
-    predict=predictDataSet(ruta_data_accions)
+    #predict=predictDataSet(ruta_data_accions)
+    predict=predictDataSet()
+    
     #sentimientos=analysisBySentiments(sigla+'.csv')
     sentimientos=""
 
