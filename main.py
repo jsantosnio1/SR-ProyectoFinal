@@ -170,7 +170,7 @@ def find_between( s, first, last ):
 
 @app.route("/nn")
 def train():
-    trainPredictDataSet("./downloads/HistoricalData_1637973374815.csv","INTC")
+    trainPredictDataSet("./downloads/HistoricalData_1638570426278.csv","INTC")
     return ""
 
 def byContent():
@@ -537,7 +537,7 @@ def getData():
         dates= driver.find_elements(By.CLASS_NAME,"table-tabs__tab")
 
         for y in dates:
-            if y.get_attribute("data-value") == 'm6':
+            if y.get_attribute("data-value") == 'y10':
                 y.click();
                 break;
         

@@ -24,11 +24,12 @@ def trainPredictDataSet(df_route, prefijoEmpresa):
 
     import warnings
     warnings.filterwarnings('ignore')
-    df = pd.read_csv(df_route)
-    df=df.rename(columns={"Close/Last":"Close"})
+    df = pd.read_csv("C:\\Users\\Asus\\PycharmProjects\\SR-ProyectoFinal\\prediction\\tsla.us.txt")
+    """ df=df.rename(columns={"Close/Last":"Close"})
     df=df.replace({'\\$':''}, regex=True)
     df['Date'] = pd.to_datetime(df['Date'])
-    df['Date'] = df['Date'].dt.strftime("%d-%m-%Y")
+    df['Date'] = df['Date'].dt.strftime("%Y-%m-%d")
+    df= df.sort_values(by="Date") """
     #df = pd.read_csv("C:/Users/JuanK/Documents/GitHub/SR-ProyectoFinal/prediction/mcft.us.txt")
 
     print(df.head())
@@ -49,8 +50,8 @@ def trainPredictDataSet(df_route, prefijoEmpresa):
     x_train = []
     y_train = []
 
-    for i in range(60, len(train_data)):
-        x_train.append(train_data[i-60:i, 0])
+    for i in range(30, len(train_data)):
+        x_train.append(train_data[i-30:i, 0])
         y_train.append(train_data[i, 0])
         if i<= 61:
             print(x_train)
@@ -79,7 +80,6 @@ def trainPredictDataSet(df_route, prefijoEmpresa):
 
     nombreModelo = 'prediction/models/prediction_model_'+prefijoEmpresa+'.h5'
     model.save(nombreModelo)
-
     # Visualiza los datos
     """ plt.figure(figsize=(16,6))
     plt.title('Model')
@@ -96,9 +96,12 @@ def trainPredictDataSet(df_route, prefijoEmpresa):
 def predictDataSet(df_ruta, prefijoEmpresa):
     
     modelCompilate = load_model('prediction/models/prediction_model_'+prefijoEmpresa+'.h5')
-    df = pd.read_csv(df_ruta)
-    df=df.rename(columns={"Close/Last":"Close"})
+    df = pd.read_csv("C:\\Users\\Asus\\PycharmProjects\\SR-ProyectoFinal\\prediction\\tsla.us.txt")
+    """ df=df.rename(columns={"Close/Last":"Close"})
     df=df.replace({'\\$':''}, regex=True)
+    df['Date'] = pd.to_datetime(df['Date'])
+    df['Date'] = df['Date'].dt.strftime("%Y-%m-%d")
+    df= df.sort_values(by="Date") """
 
     #df1 = pd.read_csv("C:/Users/JuanK/Documents/GitHub/SR-ProyectoFinal/prediction/tsla.us.txt")
     data1 = df.filter(['Close'])
@@ -108,17 +111,17 @@ def predictDataSet(df_ruta, prefijoEmpresa):
     # Obtenga el número de filas en las que entrenar el modelo
     training_data_len1 = int(np.ceil( len(dataset1)*.85  ))
     #scaled_data1 = scaler.fit_transform(dataset1)
-    test_data = scaled_data[training_data_len1 - 60: , :]
+    test_data = scaled_data[training_data_len1 - 30: , :]
 
     # Cree los conjuntos de datos x_test y y_test
     x_test = []
-    for i in range(60, len(test_data)):
-        x_test.append(test_data[i-60:i, 0])
+    for i in range(30, len(test_data)):
+        x_test.append(test_data[i-30:i, 0])
 
 
     x_test = []
-    for i in range(60, len(test_data)):
-        x_test.append(test_data[i-60:i, 0])        
+    for i in range(30, len(test_data)):
+        x_test.append(test_data[i-30:i, 0])        
     # Convierte los datos en una matriz numpy
     x_test = np.array(x_test)
     # Remodelar los datos
@@ -143,11 +146,13 @@ def predictDataSet(df_ruta, prefijoEmpresa):
     plt.legend(['Val', 'Predictions'], loc='lower right')
     aux= int(df.shape[0])
     aux_div=int(aux/10)
-    plt.xticks(np.arange(0,aux, aux_div), df['Date'][0:aux:aux_div])
-    plt.yticks(np.arange(0,aux, aux_div), df['Close'][0:aux:aux_div])
+    plt.xticks(np.arange(0,aux, aux_div), df['Date'][0:aux-1:aux_div])
+    plt.yticks(np.arange(0,aux, aux_div), df['Close'][0:aux-1:aux_div])
     #plt.show()
     pathImage = 'prediction/graficas/prediction_model_graph_'+prefijoEmpresa+'.png'
     plt.savefig(pathImage)   
     img = plt.imread(pathImage)
+    print(df.head(5))
+
     #valid
     return img
