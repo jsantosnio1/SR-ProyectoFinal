@@ -591,7 +591,6 @@ def getData():
 
     return render_template("nasdaq_response/ok.html")
 
-
 @app.route('/home',methods=['GET','POST'])
 def home():
     # Check if user is loggedin
