@@ -25,11 +25,15 @@ def trainPredictDataSet(df_route, prefijoEmpresa):
     import warnings
     warnings.filterwarnings('ignore')
     df = pd.read_csv(df_route)
+    df=df.rename(columns={"Close/Last":"Close"})
+    df=df.replace({'\\$':''}, regex=True)
+    df['Date'] = pd.to_datetime(df['Date'])
+    df['Date'] = df['Date'].dt.strftime("%d-%m-%Y")
     #df = pd.read_csv("C:/Users/JuanK/Documents/GitHub/SR-ProyectoFinal/prediction/mcft.us.txt")
 
     print(df.head())
     # Escalar los datos
-    data = df.filter(['Close/Last'])
+    data = df.filter(['Close'])
 
     dataset = data.values
     # Obtenga el número de filas en las que entrenar el modelo
@@ -77,31 +81,33 @@ def trainPredictDataSet(df_route, prefijoEmpresa):
     model.save(nombreModelo)
 
     # Visualiza los datos
-    plt.figure(figsize=(16,6))
+    """ plt.figure(figsize=(16,6))
     plt.title('Model')
     plt.xlabel('Date', fontsize=18)
     plt.ylabel('Close Price USD ($)', fontsize=18)
     plt.plot(data['Close'])
     plt.legend(['Train', 'Val', 'Predictions'], loc='lower right')
-    plt.xticks(np.arange(0,1857, 300), df['Date'][0:1857:300])
-    plt.show()
+    plt.show() """
 
     return training_data_len
 ########## FIN CREACIÓN DEL MODELO
 
 #########  LLAMADO DE MODELO ENTRENADO Y PREDICCIÓN
-def predictDataSet(df, prefijoEmpresa):
+def predictDataSet(df_ruta, prefijoEmpresa):
     
     modelCompilate = load_model('prediction/models/prediction_model_'+prefijoEmpresa+'.h5')
-    df = pd.read_csv(modelCompilate)
+    df = pd.read_csv(df_ruta)
+    df=df.rename(columns={"Close/Last":"Close"})
+    df=df.replace({'\\$':''}, regex=True)
+
     #df1 = pd.read_csv("C:/Users/JuanK/Documents/GitHub/SR-ProyectoFinal/prediction/tsla.us.txt")
-    data1 = df.filter(['Close/Last'])
+    data1 = df.filter(['Close'])
     dataset1 = data1.values    
     scaler = MinMaxScaler(feature_range=(0,1))
     scaled_data = scaler.fit_transform(dataset1)
     # Obtenga el número de filas en las que entrenar el modelo
-    training_data_len1 = int(np.ceil( len(dataset1)  ))
-    scaled_data1 = scaler.fit_transform(dataset1)
+    training_data_len1 = int(np.ceil( len(dataset1)*.85  ))
+    #scaled_data1 = scaler.fit_transform(dataset1)
     test_data = scaled_data[training_data_len1 - 60: , :]
 
     # Cree los conjuntos de datos x_test y y_test
@@ -128,16 +134,19 @@ def predictDataSet(df, prefijoEmpresa):
     valid = data1[training_data_len1 :]
     valid['Predictions'] = predictions
     # Visualiza los datos
-    plt.figure(figsize=(10,4))
+    plt.figure(figsize=(20,4))
     plt.title('Predicción')
-    plt.xlabel('Date', fontsize=18)
-    plt.ylabel('Close Price USD ($)', fontsize=18)
+    plt.xlabel('Date', fontsize=14)
+    plt.ylabel('Close Price USD ($)', fontsize=14)
     plt.plot(train['Close'])
     plt.plot(valid[['Predictions']])
     plt.legend(['Val', 'Predictions'], loc='lower right')
-    plt.xticks(np.arange(0,1857, 300), df['Date'][0:1857:300])
+    aux= int(df.shape[0])
+    aux_div=int(aux/10)
+    plt.xticks(np.arange(0,aux, aux_div), df['Date'][0:aux:aux_div])
+    plt.yticks(np.arange(0,aux, aux_div), df['Close'][0:aux:aux_div])
     #plt.show()
-    pathImage = 'prediction/graficas/prediction_model_graph_'+prefijoEmpresa+'_'+datetime.now+'.png'
+    pathImage = 'prediction/graficas/prediction_model_graph_'+prefijoEmpresa+'.png'
     plt.savefig(pathImage)   
     img = plt.imread(pathImage)
     #valid

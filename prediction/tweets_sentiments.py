@@ -10,6 +10,7 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 def analysTweets(df, prefijoEmpresa):
 
     tweets = pd.read_csv(df)
+    tweets.columns = ["tweet_id","user","post_date","body","comment_num","retweet_num","like_num"]
     analyzer = SentimentIntensityAnalyzer()
     sentences = tweets["body"]
     sentenceSample = sentences[:10]
@@ -20,14 +21,18 @@ def analysTweets(df, prefijoEmpresa):
             return 1
         else:
             return 0
+    print("entra sentimientos")
 
     sentenceSampleDf["negative"]=pd.DataFrame(sentenceSample.apply(negativityCheck).tolist())
+    print("entra sentimiento222s")
 
     # sentenceSampleDf
     # sentenceSample.head()
     # tweets.shape
     tweets["negative_sentiment"] = sentenceSampleDf["negative"]=pd.DataFrame(sentences.apply(negativityCheck).tolist())
     #tweets.head(5)
+    print("entra sen1111timientos")
+
 
     def positiveCheck(sentence):
         if(analyzer.polarity_scores(sentence)["pos"]>0.7):
@@ -44,17 +49,17 @@ def analysTweets(df, prefijoEmpresa):
     negativeTweeets = tweets.loc[tweets["negative_sentiment"]==1]
     # negativeTweeets.head(5)
     positiveTweeets = tweets.loc[tweets["positive_sentiment"]==1]
-    tweets.ticker_symbol.unique()
+    #tweets.ticker_symbol.unique()
 
     # """AMAZON"""
     # amazonDf = pd.read_csv("/content/drive/MyDrive/UNIVERSIDAD/8vo/Sistemas de Recomendación con BigData/Tweets about top companies/AMZN.csv")
     # amazonDf.head(5)
     amazonDf = tweets
     """Negative Tweets Amazon """
-    negativeTweetsAmazon = negativeTweeets.loc[negativeTweeets['ticker_symbol'] =="AMZN"]
+    negativeTweetsAmazon = negativeTweeets
     # negativeTopUsersTweetsAmazon = negativeTweeets.loc[negativeTweeets['retweet_num'] > 10]
     """Positive Tweets Amazon"""
-    positiveTweetsAmazon = positiveTweeets.loc[positiveTweeets['ticker_symbol'] =="AMZN"]
+    positiveTweetsAmazon = positiveTweeets
     # positiveTopUsersTweetsAmazon = positiveTweeets.loc[positiveTweeets['retweet_num'] > 10]
     # """Positive and Negative Top Users Amazon"""
     # negativeTopUsersTweetsAmazon.head(5)

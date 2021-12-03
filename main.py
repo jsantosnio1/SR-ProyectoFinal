@@ -168,6 +168,11 @@ def find_between( s, first, last ):
     except ValueError:
         return ""
 
+@app.route("/nn")
+def train():
+    trainPredictDataSet("./downloads/HistoricalData_1637973374815.csv","INTC")
+    return ""
+
 def byContent():
     db_connection_str = 'mysql+pymysql://sistemasderecomendacion:m2AyGl6&NRCc@sistemasderecomendacion.mysql.database.azure.com/sr'
     db_connection = create_engine(db_connection_str)
@@ -706,11 +711,15 @@ def plot_jpeg():
 #@app.route("/predictCompany")
 def predict(archivo, sigla):
     ruta_tweets=sigla+".csv"
-    ruta_data_accions="/downloads/"+archivo
+    ruta_data_accions="downloads/"+archivo
+
+    print(ruta_data_accions)
+    print(ruta_tweets)
+    #sentimientos=analysTweets(ruta_tweets,sigla)    
+
     #predict=predictDataSet(ruta_data_accions)
     predict=predictDataSet(ruta_data_accions,sigla)    
-    sentimientos=analysTweets(ruta_tweets,sigla)    
-    result =[predict, sentimientos]
+    result =[predict,""]
     return result
 
 def trainModel(archivo, sigla):
