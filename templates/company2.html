@@ -1,6 +1,6 @@
 {% extends 'layout.html' %}
 
-{% block title %}Home{% endblock %}
+{% block title %}{{company["nombre_empresa"]}}{% endblock %}
 
 {% block content %}
 
@@ -79,9 +79,13 @@
                             <td role="cell" class="summary-data__cellheading">Dividend Pay Date</td><td role="cell" class="summary-data__cell">{{company["dividen_pay"]}}</td>
                           </tr><tr class="summary-data__row" role="row">
                             <td role="cell" class="summary-data__cellheading">Current Yield</td><td role="cell" class="summary-data__cell">{{company["current_yield"]}}</td>
-                          </tr><tr class="summary-data__row" role="row">
+                          </tr>
+                          {% if company["beta"] %}
+                          <tr class="summary-data__row" role="row">
                             <td role="cell" class="summary-data__cellheading">Beta</td><td role="cell" class="summary-data__cell">{{company["beta"]}}</td>
-                          </tr></tbody>
+                          </tr>
+                          {% endif %}
+                          </tbody>
                       </table>
               </div>
             
@@ -121,6 +125,19 @@
                                         }
                                     ]
                 
+                                },
+                                options: {
+                                  
+                                    plugins: {
+                                        title: {
+                                            display: true,
+                                            text: 'Valor acciones por fecha'
+                                        },
+                                        legend: {
+                                            display: false,
+                                            
+                                        }
+                                    }
                                 }
                             };
                 

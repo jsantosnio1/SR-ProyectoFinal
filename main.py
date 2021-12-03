@@ -641,12 +641,11 @@ def home():
 
 @app.route('/getPlotCSV/<init>') # this is a job for GET, not POST
 def plot_csv(init):
-    x = pd.read_csv('downloads/'+ init )
-    df = pd.DataFrame(x)
-    df.iloc[[0,1],[0,2]]    
-    
-    df.to_csv("./graph.csv")
-    return send_file(df,
+    df = pd.read_csv('downloads/'+ init , usecols=[0,1], header=0)
+    df=df.rename(columns={"Close/Last":"Close"})
+    df=df.replace({'\\$':''}, regex=True)
+    df.to_csv("./graph.csv",index=False,sep=',')
+    return send_file("./graph.csv",
                      mimetype='text/csv',
                      attachment_filename= "graph.csv",
                      as_attachment=True)
