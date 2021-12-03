@@ -1,3 +1,9 @@
+{% extends 'layout.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,6 +16,7 @@
     <title> Comprar </title>
 </head>
 <body>
+    
     <script>
         function comprar(id_company){
             $.ajax({
@@ -28,7 +35,112 @@
         }
     </script>
     <h1>{{company["nombre_empresa"]}}</h1>
-    <br>
-    <button type="submit" onclick="comprar({{company['id_empresa']}})">Comprar</button>
+    <div class="container-fluid">	
+        <div class="row">
+                 <div class="col-md-4">
+                    <table class="summary-data__table" role="table">
+                        <thead class="visually-hidden" role="rowgroup">
+                          <tr role="row">
+                            <th role="columnheader" scope="col">Label</th>
+                            <th role="columnheader" scope="col">Value</th>
+                          </tr>
+                        </thead>
+                        <tbody class="summary-data__table-body" role="rowgroup"><tr class="summary-data__row" role="row" data-first-five="true" data-first-ten="true">
+                            <td role="cell" class="summary-data__cellheading">Exchange</td><td role="cell" class="summary-data__cell">{{company["exchange"]}}</td>
+                          </tr><tr class="summary-data__row" role="row" data-first-five="true" data-first-ten="true">
+                            <td role="cell" class="summary-data__cellheading">Sector</td><td role="cell" class="summary-data__cell">{{company["sector"]}}</td>
+                          </tr><tr class="summary-data__row" role="row" data-first-five="true" data-first-ten="true">
+                            <td role="cell" class="summary-data__cellheading">Industry</td><td role="cell" class="summary-data__cell">{{company["industry"]}}</td>
+                          </tr><tr class="summary-data__row" role="row" data-first-five="true" data-first-ten="true">
+                            <td role="cell" class="summary-data__cellheading">1 Year Target</td><td role="cell" class="summary-data__cell">{{company["year_target"]}}</td>
+                          </tr><tr class="summary-data__row" role="row" data-first-five="true" data-first-ten="true">
+                            <td role="cell" class="summary-data__cellheading">Today's High/Low</td><td role="cell" class="summary-data__cell">{{company["today"]}}</td>
+                          </tr><tr class="summary-data__row" role="row" data-first-ten="true">
+                            <td role="cell" class="summary-data__cellheading">Share Volume</td><td role="cell" class="summary-data__cell">{{company["share_volume"]}}</td>
+                          </tr><tr class="summary-data__row" role="row" data-first-ten="true">
+                            <td role="cell" class="summary-data__cellheading">Average Volume</td><td role="cell" class="summary-data__cell">{{company["average_volume"]}}</td>
+                          </tr><tr class="summary-data__row" role="row" data-first-ten="true">
+                            <td role="cell" class="summary-data__cellheading">Previous Close</td><td role="cell" class="summary-data__cell">{{company["previous_close"]}}</td>
+                          </tr><tr class="summary-data__row" role="row" data-first-ten="true">
+                            <td role="cell" class="summary-data__cellheading">52 Week High/Low</td><td role="cell" class="summary-data__cell">{{company["h_week"]}}</td>
+                          </tr></tbody><tbody class="summary-data__table-body" role="rowgroup"><tr class="summary-data__row" role="row" data-first-ten="true">
+                            <td role="cell" class="summary-data__cellheading">Market Cap</td><td role="cell" class="summary-data__cell">{{company["market_cap"]}}</td>
+                          </tr><tr class="summary-data__row" role="row">
+                            <td role="cell" class="summary-data__cellheading">P/E Ratio</td><td role="cell" class="summary-data__cell">{{company["ratio"]}}</td>
+                          </tr><tr class="summary-data__row" role="row">
+                            <td role="cell" class="summary-data__cellheading">Forward P/E 1 Yr.</td><td role="cell" class="summary-data__cell">{{company["forward"]}}</td>
+                          </tr><tr class="summary-data__row" role="row">
+                            <td role="cell" class="summary-data__cellheading">Earnings Per Share(EPS)</td><td role="cell" class="summary-data__cell">{{company["earnings"]}}</td>
+                          </tr><tr class="summary-data__row" role="row">
+                            <td role="cell" class="summary-data__cellheading">Annualized Dividend</td><td role="cell" class="summary-data__cell">{{company["annualized_dividend"]}}</td>
+                          </tr><tr class="summary-data__row" role="row">
+                            <td role="cell" class="summary-data__cellheading">Ex Dividend Date</td><td role="cell" class="summary-data__cell">{{company["dividen_date"]}}</td>
+                          </tr><tr class="summary-data__row" role="row">
+                            <td role="cell" class="summary-data__cellheading">Dividend Pay Date</td><td role="cell" class="summary-data__cell">{{company["dividen_pay"]}}</td>
+                          </tr><tr class="summary-data__row" role="row">
+                            <td role="cell" class="summary-data__cellheading">Current Yield</td><td role="cell" class="summary-data__cell">{{company["current_yield"]}}</td>
+                          </tr><tr class="summary-data__row" role="row">
+                            <td role="cell" class="summary-data__cellheading">Beta</td><td role="cell" class="summary-data__cell">{{company["beta"]}}</td>
+                          </tr></tbody>
+                      </table>
+              </div>
+            
+              <div class="col-md-8">
+                <div class="chartCard">
+                    <div class="chartBox">
+                      <canvas id="myChart"></canvas>
+                      <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.1.1/d3.min.js" integrity="sha512-COTaPOlz12cG4fSfcBsxZsjauBAyldqp+8FQUM/dZHm+ts/jR4AFoJhCqxy8K10Jrf3pojfsbq7fAPTb1XaVkg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+                      <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                      <script>
+                          let filename = '/getPlotCSV/{{company["name_file"]}}';
+                          d3.csv(filename).then(function(loadedData){
+                            //console.log(loadedData);
+                            let data = [];
+                            let labels = [];
+                
+                            for (let i = 0; i < loadedData.length; i++) {
+                                   console.log(loadedData[i]);
+                
+                                   let Datea = loadedData[i].Date;
+                                   labels.push(Datea);
+                                   let Close = loadedData[i].Close;
+                                   data.push(Close);
+                            }
+                
+                            let options = {
+                                type: 'line',
+                                data:{
+                                    labels: labels,
+                                    datasets: [
+                                        {
+                                            data: data,
+                                            fill: false,
+                                            pointRadius: 0,
+                                            pointHoverRadius: 0,
+                                            borderColor: 'rgb(100,100,100)'
+                                        }
+                                    ]
+                
+                                }
+                            };
+                
+                            const myChart = new Chart(document.getElementById('myChart'), options);
+                
+                          });
+                
+                
+                      </script>
+                    </div>
+                  </div>
+            
+
+              </div>
+            
+        </div>
+    </div>
+    <center>
+    <button type="submit" class="boton_personalizado" onclick="comprar({{company['id_empresa']}})">Comprar</button>
+</center>
 </body>
 </html>
+{% endblock %}

@@ -25,6 +25,8 @@ from sklearn.metrics.pairwise import linear_kernel
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import plotly.express as px
+import csv
 
 app=Flask(__name__)
 app.secret_key = 'your secret key'
@@ -134,6 +136,17 @@ def data():
         return render_template('data.html', accounts=accounts)
     # User is not loggedin redirect to login page
 
+@app.route('/company2')
+def company2(id=None):
+    if id != None:
+        sql = "SELECT * from empresa where id_empresa = %s";
+        db = getMysqlConnection()
+        cur = db.cursor(dictionary=True)
+        cur.execute(sql, (id,))
+        company = cur.fetchone()
+        print(company)
+
+    return render_template("company2.html",company=company)
 @app.route('/graph')    
 def graph():
     img = io.BytesIO()
@@ -626,12 +639,37 @@ def home():
     # User is not loggedin redirect to login page
     return redirect(url_for('login'))
 
-@app.route('/getPlotCSV') # this is a job for GET, not POST
-def plot_csv():
-    return send_file('downloads/a.csv',
+@app.route('/getPlotCSV/<init>') # this is a job for GET, not POST
+def plot_csv(init):
+    x = pd.read_csv('downloads/'+ init )
+    df = pd.DataFrame(x)
+    df.iloc[[0,1],[0,2]]    
+    
+    df.to_csv("./graph.csv")
+    return send_file(df,
                      mimetype='text/csv',
-                     attachment_filename='a.csv',
+                     attachment_filename= "graph.csv",
                      as_attachment=True)
+
+
+#@app.route('/getPlotCSV/<init>') # this is a job for GET, not POST
+#def plot_csv(init):
+#    x = []
+#    y = []
+  
+#    with open('downloads/'+ init,'r') as csvfile:
+#        plots = csv.reader(csvfile, delimiter = ',')
+      
+#        for row in plots:
+#                x.append(row[0])
+#                y.append(row[1])
+
+#    plt.bar(x, y, color = 'g', width = 0.72, label = "Graph")
+#plt.xlabel('Date')
+#plt.ylabel('Close')
+#plt.title('Graph')
+#plt.legend()
+#plt.show()
 
 @app.route('/getPlotCSS') # this is a job for GET, not POST
 def plot_css():
