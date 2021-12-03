@@ -19,26 +19,17 @@ from keras.models import load_model
 
 # Tesla Stock Market Analyis
 """
-#def predictDataSet(df):
-def predictDataSet():
+def trainPredictDataSet(df, prefijoEmpresa):
+#def predictDataSet():
 
     import warnings
     warnings.filterwarnings('ignore')
-    df = pd.read_csv("C:/Users/JuanK/Documents/GitHub/SR-ProyectoFinal/prediction/tsla.us.txt")
+    #df = pd.read_csv("C:/Users/JuanK/Documents/GitHub/SR-ProyectoFinal/prediction/tsla.us.txt")
     #df = pd.read_csv("C:/Users/JuanK/Documents/GitHub/SR-ProyectoFinal/prediction/mcft.us.txt")
 
     print(df.head())
     # Escalar los datos
-    data = df.filter(['Close'])
-    # Visualiza los datos
-    plt.figure(figsize=(16,6))
-    plt.title('Model')
-    plt.xlabel('Date', fontsize=18)
-    plt.ylabel('Close Price USD ($)', fontsize=18)
-    plt.plot(data['Close'])
-    plt.legend(['Train', 'Val', 'Predictions'], loc='lower right')
-    plt.xticks(np.arange(0,1857, 300), df['Date'][0:1857:300])
-    plt.show()
+    data = df.filter(['Close/Last'])
 
     dataset = data.values
     # Obtenga el número de filas en las que entrenar el modelo
@@ -46,11 +37,7 @@ def predictDataSet():
 
     scaler = MinMaxScaler(feature_range=(0,1))
     scaled_data = scaler.fit_transform(dataset)
-
-
 #### CREACIÓN Y ENTRENAMIENTO DEL MODELO
-
-
     # Crea el conjunto de datos de entrenamiento
     # Crea el conjunto de datos de entrenamiento escalado
     train_data = scaled_data[0:int(training_data_len), :]
@@ -86,33 +73,44 @@ def predictDataSet():
     # Entrenar al modelo
     model.fit(x_train, y_train, batch_size=1, epochs=1)
 
-    prefijoEmpresa = ""
-    nombreModelo = 'prediction_model_'+prefijoEmpresa+'.h5'
-    model.save('')
+    nombreModelo = 'prediction/models/prediction_model_'+prefijoEmpresa+'.h5'
+    model.save(nombreModelo)
+
+    # Visualiza los datos
+    plt.figure(figsize=(16,6))
+    plt.title('Model')
+    plt.xlabel('Date', fontsize=18)
+    plt.ylabel('Close Price USD ($)', fontsize=18)
+    plt.plot(data['Close'])
+    plt.legend(['Train', 'Val', 'Predictions'], loc='lower right')
+    plt.xticks(np.arange(0,1857, 300), df['Date'][0:1857:300])
+    plt.show()
+
+    return training_data_len
 ########## FIN CREACIÓN DEL MODELO
 
 #########  LLAMADO DE MODELO ENTRENADO Y PREDICCIÓN
+def predictDataSet(df, prefijoEmpresa):
     
-    modelCompilate = load_model('prediction_model_'+prefijoEmpresa+'.h5')
+    modelCompilate = load_model('prediction/models/prediction_model_'+prefijoEmpresa+'.h5')
     #df1 = pd.read_csv("C:/Users/JuanK/Documents/GitHub/SR-ProyectoFinal/prediction/mcft.us.txt")
-    df1 = pd.read_csv("C:/Users/JuanK/Documents/GitHub/SR-ProyectoFinal/prediction/tsla.us.txt")
-
-    data1 = df1.filter(['Close'])
-    dataset1 = data1.values
+    #df1 = pd.read_csv("C:/Users/JuanK/Documents/GitHub/SR-ProyectoFinal/prediction/tsla.us.txt")
+    data1 = df.filter(['Close/Last'])
+    dataset1 = data1.values    
+    scaler = MinMaxScaler(feature_range=(0,1))
+    scaled_data = scaler.fit_transform(dataset1)
     # Obtenga el número de filas en las que entrenar el modelo
     training_data_len1 = int(np.ceil( len(dataset1)  ))
     scaled_data1 = scaler.fit_transform(dataset1)
-    test_data = scaled_data[training_data_len - 60: , :]
+    test_data = scaled_data[training_data_len1 - 60: , :]
 
     # Cree los conjuntos de datos x_test y y_test
     x_test = []
-    #y_test = dataset[training_data_len:, :]
     for i in range(60, len(test_data)):
         x_test.append(test_data[i-60:i, 0])
 
 
     x_test = []
-    #y_test = dataset[training_data_len:, :]
     for i in range(60, len(test_data)):
         x_test.append(test_data[i-60:i, 0])        
     # Convierte los datos en una matriz numpy
@@ -126,12 +124,9 @@ def predictDataSet():
     # Obtenga la raíz del error cuadrático medio (RMSE)
     # rmse = np.sqrt(np.mean(((predictions - y_test) ** 2)))
     # rmse
-
-    train = data[:training_data_len]
-    valid = data[training_data_len:]
+    train = data1[:training_data_len1]
+    valid = data1[training_data_len1 :]
     valid['Predictions'] = predictions
-
-
     # Visualiza los datos
     plt.figure(figsize=(10,4))
     plt.title('Predicción')
@@ -141,10 +136,9 @@ def predictDataSet():
     plt.plot(valid[['Predictions']])
     plt.legend(['Val', 'Predictions'], loc='lower right')
     plt.xticks(np.arange(0,1857, 300), df['Date'][0:1857:300])
-    plt.show()
-    
- 
+    #plt.show()
+    pathImage = 'prediction/graficas/prediction_model_graph_'+prefijoEmpresa+'_'+datetime.now+'.png'
+    plt.savefig(pathImage)   
+    img = plt.imread(pathImage)
     #valid
-
-
-    return plt
+    return img
