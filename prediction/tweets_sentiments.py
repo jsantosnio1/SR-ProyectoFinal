@@ -10,6 +10,7 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 def analysTweets(df, prefijoEmpresa):
 
     tweets = pd.read_csv(df)
+    tweets.columns = ["tweet_id","writer","post_date","body","comment_num","retweet_num","like_num"]
     analyzer = SentimentIntensityAnalyzer()
     sentences = tweets["body"]
     sentenceSample = sentences[:10]
@@ -44,7 +45,7 @@ def analysTweets(df, prefijoEmpresa):
     negativeTweeets = tweets.loc[tweets["negative_sentiment"]==1]
     # negativeTweeets.head(5)
     positiveTweeets = tweets.loc[tweets["positive_sentiment"]==1]
-    tweets.ticker_symbol.unique()
+    #tweets.ticker_symbol.unique()
 
     # """AMAZON"""
     # amazonDf = pd.read_csv("/content/drive/MyDrive/UNIVERSIDAD/8vo/Sistemas de Recomendación con BigData/Tweets about top companies/AMZN.csv")
@@ -123,8 +124,7 @@ def analysTweets(df, prefijoEmpresa):
 
     ax.legend()
 
-    pathImage = 'prediction/graficas/_sentiments_tweets_'+prefijoEmpresa+'_'+datetime.now+'.png'
-    ax.savefig(pathImage)   
-    img = ax.imread(pathImage)
+    pathImage = 'prediction/graficas/_sentiments_tweets_'+prefijoEmpresa+'.png'
+    ax.figure.savefig(pathImage)   
 
-    return img
+    return pathImage

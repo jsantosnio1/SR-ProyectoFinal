@@ -715,11 +715,11 @@ def predict(archivo, sigla):
 
     print(ruta_data_accions)
     print(ruta_tweets)
-    #sentimientos=analysTweets(ruta_tweets,sigla)    
+    sentimientos=analysTweets(ruta_tweets,sigla)    
 
     #predict=predictDataSet(ruta_data_accions)
     predict=predictDataSet(ruta_data_accions,sigla)    
-    result =[predict,""]
+    result =[predict,sentimientos]
     return result
 
 def trainModel(archivo, sigla):
