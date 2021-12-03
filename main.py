@@ -1,4 +1,4 @@
-from flask import Flask,redirect,render_template,request,url_for, session
+from flask import Flask,redirect,render_template,request,url_for, session,jsonify
 from datetime import datetime
 from flask import send_file
 import undetected_chromedriver as uc
@@ -638,6 +638,31 @@ def home():
         return render_template('home.html', username=session['username'],companys=company)
     # User is not loggedin redirect to login page
     return redirect(url_for('login'))
+
+@app.route("/ajaxlivesearch",methods=["POST","GET"])
+def ajaxlivesearch():
+    db = getMysqlConnection()
+    cur = db.cursor(dictionary=True)
+    if request.method == 'POST':
+
+        search_word = request.form['query']
+        print(search_word)
+        if search_word == '':
+            query = "SELECT * from empresa ORDER BY id_empresa"
+            cur.execute(query)
+            empresa = cur.fetchall()
+        else:
+            query = "SELECT * from empresa WHERE nombre_empresa LIKE '%{}%'".format(search_word)
+            cur.execute(query)
+            numrows = int(cur.rowcount)
+            empresa = cur.fetchall()
+            print(numrows)
+            print(empresa)
+    return jsonify({'htmlresponse': render_template('response.html', empresa=empresa, numrows=numrows)})
+
+@app.route('/buscador')
+def buscador():
+    return render_template('a.html')
 
 @app.route('/getPlotCSV/<init>') # this is a job for GET, not POST
 def plot_csv(init):
