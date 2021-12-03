@@ -314,8 +314,9 @@ def getCompany(id=None):
         cur = db.cursor(dictionary=True)
         cur.execute(sql, (id,))
         company = cur.fetchone()
+        predictions= predict(company['name_file'],company['sigla_empresa'])
 
-    return render_template("company2.html",company=company)
+    return render_template("company2.html",company=company, predictions=predictions)
 
 @app.route("/saveBuy",methods=["POST"])
 def saveBuy():
@@ -704,13 +705,13 @@ def plot_jpeg():
 
 #@app.route("/predictCompany")
 def predict(archivo, sigla):
-    sigla=sigla+".csv"
-    ruta_data_accions="/downloads/"+archivo+sigla
+    ruta_tweets=sigla+".csv"
+    ruta_data_accions="/downloads/"+archivo
     #predict=predictDataSet(ruta_data_accions)
     predict=predictDataSet(ruta_data_accions,sigla)    
-    sentimientos=analysTweets(ruta_data_accions,sigla)    
-
-    return render_template("final_predict.html",predict=predict,sentimientos=sentimientos)
+    sentimientos=analysTweets(ruta_tweets,sigla)    
+    result =[predict, sentimientos]
+    return result
 
 def trainModel(archivo, sigla):
     sigla=sigla+".csv"

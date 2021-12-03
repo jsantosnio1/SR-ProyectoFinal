@@ -19,12 +19,12 @@ from keras.models import load_model
 
 # Tesla Stock Market Analyis
 """
-def trainPredictDataSet(df, prefijoEmpresa):
+def trainPredictDataSet(df_route, prefijoEmpresa):
 #def predictDataSet():
 
     import warnings
     warnings.filterwarnings('ignore')
-    #df = pd.read_csv("C:/Users/JuanK/Documents/GitHub/SR-ProyectoFinal/prediction/tsla.us.txt")
+    df = pd.read_csv(df_route)
     #df = pd.read_csv("C:/Users/JuanK/Documents/GitHub/SR-ProyectoFinal/prediction/mcft.us.txt")
 
     print(df.head())
@@ -93,7 +93,7 @@ def trainPredictDataSet(df, prefijoEmpresa):
 def predictDataSet(df, prefijoEmpresa):
     
     modelCompilate = load_model('prediction/models/prediction_model_'+prefijoEmpresa+'.h5')
-    #df1 = pd.read_csv("C:/Users/JuanK/Documents/GitHub/SR-ProyectoFinal/prediction/mcft.us.txt")
+    df = pd.read_csv(modelCompilate)
     #df1 = pd.read_csv("C:/Users/JuanK/Documents/GitHub/SR-ProyectoFinal/prediction/tsla.us.txt")
     data1 = df.filter(['Close/Last'])
     dataset1 = data1.values    
