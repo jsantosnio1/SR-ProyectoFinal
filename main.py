@@ -275,56 +275,63 @@ def byContent():
 
 @app.route("/predictByFilter")
 def byFilter():
-    db_connection_str = 'mysql+pymysql://sistemasderecomendacion:m2AyGl6&NRCc@sistemasderecomendacion.mysql.database.azure.com/sr'
-    db_connection = create_engine(db_connection_str)
-    df = pd.read_sql('SELECT nombre_empresa, sector, industry FROM empresa', con=db_connection)
-    #df.drop(['id_empresa','sigla_empresa','name_file','estado_empresa','exchange','dividen_pay','dividen_date',"market_cap"], axis=1, inplace=True)
-    df=df.replace({'\\$':''}, regex=True)
-    df=df.replace({'\\%':''}, regex=True)
-    df=df.replace({'N/A':''}, regex=True)
-
-    columnsString=["nombre_empresa","sector","industry"]
-    df[columnsString]=df[columnsString].astype("string")
+    db = getMysqlConnection()
+    cur = db.cursor()
+    sql= "SELECT id_usuario FROM usuario"
+    cur.execute(sql)
+    users = cur.fetchall()
     
-    """columnsToArray=["today","h_week","share_volume","average_volume"]
+    sql= "SELECT id_empresa, nombre_empresa FROM empresa"
+    cur.execute(sql)
+    companies = cur.fetchall()
+    d={}
+    l=[]
+    aux=0
+    for user in users:
+        d[user[0]]=[]
 
-    for column in columnsToArray:
-        if(column=="today" or column=="h_week"):
-            separator="/"
-        else:
-            separator=","
+        for company in companies:
+            sql= "SELECT count(*) FROM acciones where id_empresa = %s and id_usuario = %s"
+            cur.execute(sql,(company[0],user[0]))
+            count = cur.fetchone()
+            d[user[0]].append(count[0])
+            if aux==0:
+                l.append(company[1])
+        aux=1
+  
+    df = pd.DataFrame(d, index =l)
+    # print the data
 
-        df[column] = df[column].apply(lambda x: x.split(separator) if x != '' else [])
-        s = df.apply(lambda x: pd.Series(x[column]),axis=1).stack().reset_index(level=1, drop=True)
-        s.name = column+"_clean"
-        df = df.drop(column, axis=1).join(s)
+    df_corr=df.corr(method='pearson')
+
+    def vecinosCercanos(corrUser, k=5):
+        return corrUser[corrUser.index != corrUser.name].nlargest(n=k).index.tolist()
+
+    vecinos = df_corr.apply(lambda col: vecinosCercanos(col))
+
+    def calculateRecomendationUser(vecinosCercanos, usercorr, data):    
+        def calculatePredictCompany(vecinosCercanos,usercorr,buyCompany): 
+            haveBuy = ~np.isnan(buyCompany)
+            if(np.sum(haveBuy) != 0):
+                return np.dot(buyCompany.loc[haveBuy], usercorr.loc[haveBuy])/np.sum(usercorr[haveBuy])
+            else:
+                return np.nan        
+        return df.apply(lambda row: calculatePredictCompany(vecinosCercanos, usercorr, row[vecinosCercanos]), axis=1)
+        
+    predictCompany = df.apply(lambda buys: calculateRecomendationUser(vecinos[buys.name],df_corr[buys.name][vecinos[buys.name]],df))
+
+    sql= "SELECT nombre_empresa FROM acciones a, empresa e where a.id_empresa=e.id_empresa and a.id_usuario =%s group by nombre_empresa"
+    cur.execute(sql,(session["id"],))
+    companies_of_user = [item[0] for item in cur.fetchall()]
 
 
-    columnsString=["nombre_empresa","sector","industry"]
-    df[columnsString]=df[columnsString].astype("string")
-    
-    def processCol(col):
-        return col.astype(str).apply(lambda val: val.replace(',','') if val != '' else 0).astype(float)
-
-    num_columns = df.select_dtypes(exclude='string').columns
-    df[num_columns]=df[num_columns].apply(processCol)"""
-
-    vectorizer = TfidfVectorizer(min_df=1, stop_words='english')
-    bag_of_words= vectorizer.fit_transform(df["sector"]+" "+df["industry"])
-    print(bag_of_words.shape)
-    cosine_sim = linear_kernel(bag_of_words, bag_of_words)
-    indices = pd.Series(df.index, index=df['nombre_empresa']).drop_duplicates()
-
-    def content_recommender(top, title, cosine_sim=cosine_sim, df=df, indices=indices):
-        idx = indices[title]
-        sim_scores = list(enumerate(cosine_sim[idx]))
-        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
-        sim_scores = sim_scores[1:top+1]
-        companies_indices = [i[0] for i in sim_scores]
-        return df['nombre_empresa'].iloc[companies_indices]
-    
-    print(content_recommender(5,'Intel Corporation Common Stock (INTC)'))
-
+    predict=predictCompany[session["id"]].sort_values(ascending=False).head(5)
+    predict.to_csv("./al.csv")
+    ap=pd.read_csv("./al.csv")
+    ar=ap.iloc[:,0].to_numpy()
+    b = np.array(companies_of_user)
+    c = ar[~np.in1d(ar,b)]
+    print(c)
 
     return render_template("index.html")
 
