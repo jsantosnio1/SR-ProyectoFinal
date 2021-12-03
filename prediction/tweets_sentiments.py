@@ -67,16 +67,16 @@ def analysTweets(df, prefijoEmpresa):
     """Negative And Positive Tweets of Amazon"""
     # negativeTweetsAmazon.head(5)
     # positiveTweetsAmazon.head(5)
-    negativeTweetsAmazon['Date'] = pd.to_datetime(negativeTweetsAmazon['post_date'],unit='s').dt.strftime('%d-%m-%Y')
-    positiveTweetsAmazon['Date'] = pd.to_datetime(positiveTweetsAmazon['post_date'],unit='s').dt.strftime('%d-%m-%Y')
+    negativeTweetsAmazon['post_date'] = pd.to_datetime(negativeTweetsAmazon['post_date'],unit='s').dt.strftime('%d-%m-%Y')
+    positiveTweetsAmazon['post_date'] = pd.to_datetime(positiveTweetsAmazon['post_date'],unit='s').dt.strftime('%d-%m-%Y')
     # amazonNegativeInfluence= pd.merge(negativeTweetsAmazon,amazonDf,on="Date",how="inner")
     # amazonPositiveInfluence= pd.merge(positiveTweetsAmazon,amazonDf,on="Date",how="inner")
     # amazonNegativeInfluence.head(5)
 
     # amazonPositiveInfluence.head(5)
 
-    negativeTweetsOnAmazonDateCount= negativeTweetsAmazon["Date"].value_counts()
-    positiveTweetsOnAmazonDateCount= positiveTweetsAmazon["Date"].value_counts()
+    negativeTweetsOnAmazonDateCount= negativeTweetsAmazon["post_date"].value_counts()
+    positiveTweetsOnAmazonDateCount= positiveTweetsAmazon["post_date"].value_counts()
 
     negativeTweetsOnAmazonDateCount = pd.DataFrame(negativeTweetsOnAmazonDateCount)
     negativeTweetsOnAmazonDateCount.reset_index(inplace=True)
@@ -89,12 +89,12 @@ def analysTweets(df, prefijoEmpresa):
     # negativeTweetsOnAmazonDateCount.head(5)
 
     negativeTweetsOnAmazonDateCount["countNegative"] = negativeTweetsOnAmazonDateCount["Date"]
-    negativeTweetsOnAmazonDateCount.drop("Date",axis=1,inplace=True)
-    negativeTweetsOnAmazonDateCount["Date"] = negativeTweetsOnAmazonDateCount["index"]
+    negativeTweetsOnAmazonDateCount.drop("post_date",axis=1,inplace=True)
+    negativeTweetsOnAmazonDateCount["post_date"] = negativeTweetsOnAmazonDateCount["index"]
 
     positiveTweetsOnAmazonDateCount["countPositive"] = positiveTweetsOnAmazonDateCount["Date"]
-    positiveTweetsOnAmazonDateCount.drop("Date",axis=1,inplace=True)
-    positiveTweetsOnAmazonDateCount["Date"] = positiveTweetsOnAmazonDateCount["index"]
+    positiveTweetsOnAmazonDateCount.drop("post_date",axis=1,inplace=True)
+    positiveTweetsOnAmazonDateCount["post_date"] = positiveTweetsOnAmazonDateCount["index"]
 
     amazonInfluenceByNo= pd.merge(negativeTweetsOnAmazonDateCount,amazonDf,on="Date",how="inner")
 
@@ -107,10 +107,10 @@ def analysTweets(df, prefijoEmpresa):
 
     fig, ax = plt.subplots(figsize=(15,15))
 
-    amazonInfluenceByNo["dateTime"] = pd.to_datetime(amazonInfluenceByNo["Date"])
+    amazonInfluenceByNo["dateTime"] = pd.to_datetime(amazonInfluenceByNo["post_date"])
     amazonInfluenceByNo = amazonInfluenceByNo.sort_values(by="dateTime")
 
-    amazonInfluenceByYes["dateTime"] = pd.to_datetime(amazonInfluenceByYes["Date"])
+    amazonInfluenceByYes["dateTime"] = pd.to_datetime(amazonInfluenceByYes["post_date"])
     amazonInfluenceByYes = amazonInfluenceByYes.sort_values(by="dateTime")  
 
 
