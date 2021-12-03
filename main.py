@@ -1,5 +1,4 @@
 from flask import Flask,redirect,render_template,request,url_for, session
-from flask_cors import CORS, cross_origin
 from datetime import datetime
 from flask import send_file
 import undetected_chromedriver as uc
@@ -64,6 +63,68 @@ def login():
 @app.route('/requestCompany',methods=['GET','POST'])
 def requestCompany():
     return render_template('nasdaq_petition/index.html')
+
+@app.route("/predictByFilter")
+def byFilter():
+    db = getMysqlConnection()
+    cur = db.cursor()
+    sql= "SELECT id_usuario FROM usuario"
+    cur.execute(sql)
+    users = cur.fetchall()
+    
+    sql= "SELECT id_empresa, nombre_empresa FROM empresa"
+    cur.execute(sql)
+    companies = cur.fetchall()
+    d={}
+    l=[]
+    aux=0
+    for user in users:
+        d[user[0]]=[]
+
+        for company in companies:
+            sql= "SELECT count(*) FROM acciones where id_empresa = %s and id_usuario = %s"
+            cur.execute(sql,(company[0],user[0]))
+            count = cur.fetchone()
+            d[user[0]].append(count[0])
+            if aux==0:
+                l.append(company[1])
+        aux=1
+  
+    df = pd.DataFrame(d, index =l)
+    # print the data
+
+    df_corr=df.corr(method='pearson')
+
+    def vecinosCercanos(corrUser, k=5):
+        return corrUser[corrUser.index != corrUser.name].nlargest(n=k).index.tolist()
+
+    vecinos = df_corr.apply(lambda col: vecinosCercanos(col))
+
+    def calculateRecomendationUser(vecinosCercanos, usercorr, data):    
+        def calculatePredictCompany(vecinosCercanos,usercorr,buyCompany): 
+            haveBuy = ~np.isnan(buyCompany)
+            if(np.sum(haveBuy) != 0):
+                return np.dot(buyCompany.loc[haveBuy], usercorr.loc[haveBuy])/np.sum(usercorr[haveBuy])
+            else:
+                return np.nan        
+        return df.apply(lambda row: calculatePredictCompany(vecinosCercanos, usercorr, row[vecinosCercanos]), axis=1)
+        
+    predictCompany = df.apply(lambda buys: calculateRecomendationUser(vecinos[buys.name],df_corr[buys.name][vecinos[buys.name]],df))
+
+    sql= "SELECT nombre_empresa FROM acciones a, empresa e where a.id_empresa=e.id_empresa and a.id_usuario =%s group by nombre_empresa"
+    cur.execute(sql,(session["id"],))
+    companies_of_user = [item[0] for item in cur.fetchall()]
+
+
+    predict=predictCompany[session["id"]].sort_values(ascending=False).head(5)
+    predict.to_csv("./al.csv")
+    ap=pd.read_csv("./al.csv")
+    ar=ap.iloc[:,0].to_numpy()
+    b = np.array(companies_of_user)
+    c = ar[~np.in1d(ar,b)]
+    print(c)
+
+    return render_template("index.html")
 
 @app.route('/logout')
 def logout():
