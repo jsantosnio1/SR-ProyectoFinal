@@ -46,7 +46,6 @@ def login():
         cur.execute('SELECT * FROM usuario WHERE nick_name_usuario = %s AND password_usuario = %s', (username, password,))
         # Fetch one record and return result
         account = cur.fetchone()
-        print(account)
         # If account exists in accounts table in out database
         if account:
             # Create session data, we can access this data in other routes
@@ -130,7 +129,6 @@ def data():
         cur = db.cursor()
         cur.execute('SELECT * FROM usuario')
         accounts = cur.fetchall()
-        print(accounts)
         db.commit()
         # Show the profile page with account info
         return render_template('data.html', accounts=accounts)
@@ -144,7 +142,6 @@ def company2(id=None):
         cur = db.cursor(dictionary=True)
         cur.execute(sql, (id,))
         company = cur.fetchone()
-        print(company)
 
     return render_template("company2.html",company=company)
 @app.route('/graph')    
@@ -158,7 +155,6 @@ def graph():
 
     plot_url = base64.b64encode(img.getvalue())
     return render_template('graph2.html', plot_url=plot_url)
-    print(threading.current_thread())
 
 def find_between( s, first, last ):
     try:
@@ -205,7 +201,6 @@ def byContent():
 
     vectorizer = TfidfVectorizer(min_df=1, stop_words='english')
     bag_of_words= vectorizer.fit_transform(df["sector"]+" "+df["industry"])
-    print(bag_of_words.shape)
     cosine_sim = linear_kernel(bag_of_words, bag_of_words)
     indices = pd.Series(df.index, index=df['nombre_empresa']).drop_duplicates()
 
@@ -261,8 +256,6 @@ def byFilter():
         aux=1
   
     df = pd.DataFrame(d, index =l)
-    # print the data
-
     df_corr=df.corr(method='pearson')
 
     def vecinosCercanos(corrUser, k=5):
@@ -317,7 +310,6 @@ def getCompany(id=None):
         cur = db.cursor(dictionary=True)
         cur.execute(sql, (id,))
         company = cur.fetchone()
-        print(company)
 
     return render_template("company2.html",company=company)
 
@@ -338,7 +330,6 @@ def saveBuy():
     val = (id_c,session["id"],fecha,"comprada")
     cur.execute(sql, val)
     conn.commit()
-    print("llego el id "+id_c)
 
     return ""
 
@@ -355,7 +346,6 @@ def index():  # put application's code here
     cur = db.cursor()
     cur.execute(sqlstr)
     empleados = cur.fetchall()
-    print(empleados)
     return render_template('empresas/index.html',empleados=empleados)
 
 @app.route('/destroy/<int:id>')
@@ -373,7 +363,6 @@ def edit(id):
     cur.execute("SELECT * FROM usuario where id=%s",(id))
     usuarios = cur.fetchall()
     conn.commit()
-    print(usuarios)
     return redirect('/edit.html',usuarios=usuarios)
 
 
@@ -559,8 +548,6 @@ def getData():
 
         list_of_files = glob.glob(filename+"\*") # * means all if need specific format then *.csv
         latest_file = max(list_of_files, key=os.path.getctime)#save id,empresa, sigla, latest_file
-        print(latest_file)
-        #print(data_company)#guardar data empresa
         exchange = data_company[0][1]
         sector = data_company [1][1]
         industry = data_company [2][1]
@@ -613,8 +600,6 @@ def home():
         # We need all the account info for the user so we can display it on the profile page
         db = getMysqlConnection()
         cur = db.cursor()
-        cur.execute('SELECT * FROM empresa ')
-        company = cur.fetchall()
         
         cur.execute('SELECT count(*) FROM acciones where id_usuario = %s',(session["id"],))
         tiene = cur.fetchone()
@@ -633,9 +618,9 @@ def home():
 
             db.commit()
 
-            return render_template("home.html", username=session['username'],companys=company, recomendados=arr_recomendados)
+            return render_template("home.html", username=session['username'], recomendados=arr_recomendados)
 
-        return render_template('home.html', username=session['username'],companys=company)
+        return render_template('home.html', username=session['username'])
     # User is not loggedin redirect to login page
     return redirect(url_for('login'))
 
@@ -644,20 +629,23 @@ def ajaxlivesearch():
     db = getMysqlConnection()
     cur = db.cursor(dictionary=True)
     if request.method == 'POST':
-
-        search_word = request.form['query']
-        print(search_word)
+        
+        try:
+            search_word = request.form['query']
+        except:
+            search_word = ""
         if search_word == '':
             query = "SELECT * from empresa ORDER BY id_empresa"
             cur.execute(query)
             empresa = cur.fetchall()
+            numrows=""
         else:
             query = "SELECT * from empresa WHERE nombre_empresa LIKE '%{}%'".format(search_word)
             cur.execute(query)
-            numrows = int(cur.rowcount)
             empresa = cur.fetchall()
-            print(numrows)
-            print(empresa)
+            numrows = 0
+            for e in empresa:
+                numrows=numrows + 1
     return jsonify({'htmlresponse': render_template('response.html', empresa=empresa, numrows=numrows)})
 
 @app.route('/buscador')
@@ -732,10 +720,8 @@ def convertToCSV(sigla):
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM Tweet")
     rows = cursor.fetchall()
-    print("entra csv")
     for row in rows:
         csvWriter.writerow(row)
-    print("sale csv")
 
 def insert_bd():
       """if request.method=='POST':
