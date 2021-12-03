@@ -20,6 +20,8 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.keys import Keys
 from prediction.predictionstockmarket import predictDataSet
 from prediction.predictionstockmarket import trainPredictDataSet
+from prediction.tweets_sentiments import analysTweets
+
 
 from sqlalchemy import create_engine
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -701,15 +703,12 @@ def plot_jpeg():
                      as_attachment=True)
 
 #@app.route("/predictCompany")
-
-
 def predict(archivo, sigla):
     sigla=sigla+".csv"
     ruta_data_accions="/downloads/"+archivo+sigla
     #predict=predictDataSet(ruta_data_accions)
     predict=predictDataSet(ruta_data_accions,sigla)    
-    #sentimientos=analysisBySentiments(sigla+'.csv')
-    sentimientos=""
+    sentimientos=analysTweets(ruta_data_accions,sigla)    
 
     return render_template("final_predict.html",predict=predict,sentimientos=sentimientos)
 
