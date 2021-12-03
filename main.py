@@ -104,14 +104,7 @@ def register():
             msg = 'You have successfully registered!'
     return render_template('register.html', msg=msg)
 
-@app.route('/home')
-def home():
-    # Check if user is loggedin
-    if 'loggedin' in session:
-        # User is loggedin show them the home page
-        return render_template('home.html', username=session['username'])
-    # User is not loggedin redirect to login page
-    return redirect(url_for('login'))
+
 
 @app.route('/profile')
 def profile():
@@ -569,10 +562,22 @@ def getData():
 
     return render_template("nasdaq_response/ok.html")
 
-@app.route('/cc',methods=['GET','POST'])
-@cross_origin()
-def cc():
-    return render_template('company.html')
+
+@app.route('/home',methods=['GET','POST'])
+def home():
+    # Check if user is loggedin
+    if 'loggedin' in session:
+        # User is loggedin show them the home page
+        # We need all the account info for the user so we can display it on the profile page
+        db = getMysqlConnection()
+        cur = db.cursor()
+        cur.execute('SELECT * FROM empresa ')
+        company = cur.fetchall()
+        print(company)
+        db.commit()
+        return render_template('home.html', username=session['username'],companys=company)
+    # User is not loggedin redirect to login page
+    return redirect(url_for('login'))
 
 @app.route('/getPlotCSV') # this is a job for GET, not POST
 def plot_csv():

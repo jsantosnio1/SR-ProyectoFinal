@@ -73,28 +73,34 @@
   <section class="wrapper">
     <div class="container-fluid">
       <div class="row">
+      {% for company in companys%}
           <div class="col-md-4">
+
               <div class="card text-black card-has-bg click-col" data-toggle="modal" data-target="#modal-fullscreen-xl">
-                  <div class="card-img-overlay d-flex flex-column">	
+                  <div class="card-img-overlay d-flex flex-column">
                       <div class="card-body">
-                          <h4 class="card-title mt-0 "><a class="text-black" herf="#">TESLA</a></h4>
-                          <small><i class="far fa-clock"></i> TSLA</small>
+                          <h4 class="card-title mt-0 "><a class="text-black" herf="#">{{company[1] }}</a></h4>
+                          <small><i class="far fa-clock"></i> {{company[2] }}</small>
+
                       </div>
+
                       <div class="card-footer">
                           <div class="media">
                               <img class="mr-3 rounded-circle" src="/getB" alt="Generic placeholder image" style="max-width:50px">
                               <div class="media-body">
                                   <h6 class="my-0 text-black d-block">Market Cap</h6>
-                                  <small>1,097,862,336,206</small>
+                                  <small>{{company[13] }}</small>
                               </div>
                           </div>
                       </div>
                   </div>
               </div>
+
         </div>
+            {% endfor %}
         <div class="col-md-4">
               <div class="card text-black card-has-bg click-col" data-toggle="modal" data-target="#modal-fullscreen-xl">
-                  <div class="card-img-overlay d-flex flex-column">	
+                  <div class="card-img-overlay d-flex flex-column">
                       <div class="card-body">
                           <h4 class="card-title mt-0 "><a class="text-black" herf="#">AMAZON</a></h4>
                           <small><i class="far fa-clock"></i> AMZN</small>
@@ -113,7 +119,7 @@
         </div>
         <div class="col-md-4">
               <div class="card text-black card-has-bg click-col" data-toggle="modal" data-target="#modal-fullscreen-xl">
-                  <div class="card-img-overlay d-flex flex-column">	
+                  <div class="card-img-overlay d-flex flex-column">
                       <div class="card-body">
                           <h4 class="card-title mt-0 "><a class="text-black" herf="#">APPLE</a></h4>
                           <small><i class="far fa-clock"></i> AAPL</small>

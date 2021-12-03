@@ -3,6 +3,161 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-<h2>Home Page</h2>
-<p>Welcome back, {{ username }}!</p>
-{% endblock %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+    <!-- Bootstrap CSS -->
+	 <link rel="stylesheet" href="/getPlotCSS">
+     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+
+     <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <title> Company </title>
+</head>
+<body>
+
+    <h1>Company</h1>
+    <div class="chartCard">
+        <div class="chartBox">
+          <canvas id="myChart"></canvas>
+        </div>
+      </div>
+
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.1.1/d3.min.js" integrity="sha512-COTaPOlz12cG4fSfcBsxZsjauBAyldqp+8FQUM/dZHm+ts/jR4AFoJhCqxy8K10Jrf3pojfsbq7fAPTb1XaVkg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+      <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <script>
+          let filename = '/getPlotCSV';
+          d3.csv(filename).then(function(loadedData){
+            //console.log(loadedData);
+            let data = [];
+            let labels = [];
+
+            for (let i = 0; i < loadedData.length; i++) {
+                   console.log(loadedData[i]);
+
+                   let Datea = loadedData[i].Date;
+                   labels.push(Datea);
+                   let Close = loadedData[i].Close;
+                   data.push(Close);
+            }
+
+            let options = {
+                type: 'line',
+                data:{
+                    labels: labels,
+                    datasets: [
+                        {
+                            data: data,
+                            fill: false,
+                            pointRadius: 0,
+                            pointHoverRadius: 0,
+                            borderColor: 'rgb(100,100,100)'
+                        }
+                    ]
+
+                }
+            };
+
+            const myChart = new Chart(document.getElementById('myChart'), options);
+
+          });
+
+
+      </script>
+
+  <section class="wrapper">
+    <div class="container-fluid">
+      <div class="row">
+      {% for company in companys%}
+          <a href="/getCompany/{{ company[0] }}">
+          <div class="col-md-4" >
+
+              <div class="card text-black card-has-bg click-col" data-toggle="modal" data-target="#modal-fullscreen-xl">
+                  <div class="card-img-overlay d-flex flex-column">
+                      <div class="card-body">
+                          <h4 class="card-title mt-0 "<a href="/getCompany/{{ company[0] }}"> {{company[1] }}</a></h4>
+                          <small><i class="far fa-clock"></i> {{company[2] }}</small>
+
+                      </div>
+
+                      <div class="card-footer">
+                          <div class="media">
+                              <img class="mr-3 rounded-circle" src="/getB" alt="Generic placeholder image" style="max-width:50px">
+                              <div class="media-body">
+                                  <h6 class="my-0 text-black d-block">Market Cap</h6>
+                                  <small>{{company[13] }}</small>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+
+        </div>
+            {% endfor %}
+        <div class="col-md-4">
+              <div class="card text-black card-has-bg click-col" data-toggle="modal" data-target="#modal-fullscreen-xl">
+                  <div class="card-img-overlay d-flex flex-column">
+                      <div class="card-body">
+                          <h4 class="card-title mt-0 "><a class="text-black" herf="#">AMAZON</a></h4>
+                          <small><i class="far fa-clock"></i> AMZN</small>
+                      </div>
+                      <div class="card-footer">
+                          <div class="media">
+                              <img class="mr-3 rounded-circle" src="/getB" alt="Generic placeholder image" style="max-width:50px">
+                              <div class="media-body">
+                                  <h6 class="my-0 text-black d-block">Market Cap</h6>
+                                  <small>1,754,274,332,342</small>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+        </div>
+        <div class="col-md-4">
+              <div class="card text-black card-has-bg click-col" data-toggle="modal" data-target="#modal-fullscreen-xl">
+                  <div class="card-img-overlay d-flex flex-column">
+                      <div class="card-body">
+                          <h4 class="card-title mt-0 "><a class="text-black" herf="#">APPLE</a></h4>
+                          <small><i class="far fa-clock"></i> AAPL</small>
+                      </div>
+                      <div class="card-footer">
+                          <div class="media">
+                              <img class="mr-3 rounded-circle" src="/getB" alt="Generic placeholder image" style="max-width:50px">
+                              <div class="media-body">
+                                  <h6 class="my-0 text-black d-block">Market Cap</h6>
+                                  <small></small>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+        </div>
+      </div>
+    </div>
+  </section>
+<ul class="pagination">
+  <li><a href="#">&laquo;</a></li>
+  <li><a href="#">1</a></li>
+  <li><a href="#">2</a></li>
+  <li><a href="#">3</a></li>
+  <li><a href="#">4</a></li>
+  <li><a href="#">5</a></li>
+  <li><a href="#">&raquo;</a></li>
+</ul>
+
+
+
+</body>
+</html>
+  {% endblock %}
