@@ -64,68 +64,6 @@ def login():
 def requestCompany():
     return render_template('nasdaq_petition/index.html')
 
-@app.route("/predictByFilter")
-def byFilter():
-    db = getMysqlConnection()
-    cur = db.cursor()
-    sql= "SELECT id_usuario FROM usuario"
-    cur.execute(sql)
-    users = cur.fetchall()
-    
-    sql= "SELECT id_empresa, nombre_empresa FROM empresa"
-    cur.execute(sql)
-    companies = cur.fetchall()
-    d={}
-    l=[]
-    aux=0
-    for user in users:
-        d[user[0]]=[]
-
-        for company in companies:
-            sql= "SELECT count(*) FROM acciones where id_empresa = %s and id_usuario = %s"
-            cur.execute(sql,(company[0],user[0]))
-            count = cur.fetchone()
-            d[user[0]].append(count[0])
-            if aux==0:
-                l.append(company[1])
-        aux=1
-  
-    df = pd.DataFrame(d, index =l)
-    # print the data
-
-    df_corr=df.corr(method='pearson')
-
-    def vecinosCercanos(corrUser, k=5):
-        return corrUser[corrUser.index != corrUser.name].nlargest(n=k).index.tolist()
-
-    vecinos = df_corr.apply(lambda col: vecinosCercanos(col))
-
-    def calculateRecomendationUser(vecinosCercanos, usercorr, data):    
-        def calculatePredictCompany(vecinosCercanos,usercorr,buyCompany): 
-            haveBuy = ~np.isnan(buyCompany)
-            if(np.sum(haveBuy) != 0):
-                return np.dot(buyCompany.loc[haveBuy], usercorr.loc[haveBuy])/np.sum(usercorr[haveBuy])
-            else:
-                return np.nan        
-        return df.apply(lambda row: calculatePredictCompany(vecinosCercanos, usercorr, row[vecinosCercanos]), axis=1)
-        
-    predictCompany = df.apply(lambda buys: calculateRecomendationUser(vecinos[buys.name],df_corr[buys.name][vecinos[buys.name]],df))
-
-    sql= "SELECT nombre_empresa FROM acciones a, empresa e where a.id_empresa=e.id_empresa and a.id_usuario =%s group by nombre_empresa"
-    cur.execute(sql,(session["id"],))
-    companies_of_user = [item[0] for item in cur.fetchall()]
-
-
-    predict=predictCompany[session["id"]].sort_values(ascending=False).head(5)
-    predict.to_csv("./al.csv")
-    ap=pd.read_csv("./al.csv")
-    ar=ap.iloc[:,0].to_numpy()
-    b = np.array(companies_of_user)
-    c = ar[~np.in1d(ar,b)]
-    print(c)
-
-    return render_template("index.html")
-
 @app.route('/logout')
 def logout():
     # Remove session data, this will log the user out
@@ -217,7 +155,6 @@ def find_between( s, first, last ):
     except ValueError:
         return ""
 
-@app.route("/predictContent")
 def byContent():
     db_connection_str = 'mysql+pymysql://sistemasderecomendacion:m2AyGl6&NRCc@sistemasderecomendacion.mysql.database.azure.com/sr'
     db_connection = create_engine(db_connection_str)
@@ -264,16 +201,27 @@ def byContent():
         sim_scores = list(enumerate(cosine_sim[idx]))
         sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
         sim_scores = sim_scores[1:top+1]
-        companies_indices = [i[0] for i in sim_scores]
-        return df['nombre_empresa'].iloc[companies_indices]
+        movie_indices = [i[0] for i in sim_scores]
+        return df['nombre_empresa'].iloc[movie_indices]
     
-    print(content_recommender(5,'Intel Corporation Common Stock (INTC)'))
+    sql= "SELECT nombre_empresa FROM acciones a, empresa e where a.id_empresa=e.id_empresa and a.id_usuario =%s group by nombre_empresa"
+    db = getMysqlConnection()
+    cur = db.cursor()
+    cur.execute(sql,(session["id"],))
+    
+    companies_of_user = [item[0] for item in cur.fetchall()]
+    aux=0
+    response=np.array([])
+    for company in companies_of_user:
+        if aux==2:
+            break
+        x=content_recommender(5,company).to_numpy()
+        response=np.concatenate((response, x))
+        ++aux
+
+    return response
 
 
-    return render_template("index.html")
-
-
-@app.route("/predictByFilter")
 def byFilter():
     db = getMysqlConnection()
     cur = db.cursor()
@@ -320,20 +268,33 @@ def byFilter():
         
     predictCompany = df.apply(lambda buys: calculateRecomendationUser(vecinos[buys.name],df_corr[buys.name][vecinos[buys.name]],df))
 
-    sql= "SELECT nombre_empresa FROM acciones a, empresa e where a.id_empresa=e.id_empresa and a.id_usuario =%s group by nombre_empresa"
-    cur.execute(sql,(session["id"],))
-    companies_of_user = [item[0] for item in cur.fetchall()]
+    
 
 
     predict=predictCompany[session["id"]].sort_values(ascending=False).head(5)
     predict.to_csv("./al.csv")
     ap=pd.read_csv("./al.csv")
     ar=ap.iloc[:,0].to_numpy()
-    b = np.array(companies_of_user)
-    c = ar[~np.in1d(ar,b)]
-    print(c)
 
-    return render_template("index.html")
+    db.commit()
+    
+    return ar
+
+def hybrid():
+    content=byContent()
+    filter= byFilter()
+
+    db = getMysqlConnection()
+    cur = db.cursor()
+    sql= "SELECT nombre_empresa FROM acciones a, empresa e where a.id_empresa=e.id_empresa and a.id_usuario =%s group by nombre_empresa"
+    cur.execute(sql,(session["id"],))
+    companies_of_user = [item[0] for item in cur.fetchall()]
+
+    b = np.array(companies_of_user)
+    ar = np.intersect1d(content, filter)
+    c = ar[~np.in1d(ar,b)]
+    db.commit()
+    return c
 
 @app.route("/getCompany/<int:id>")
 def getCompany(id=None):
@@ -641,7 +602,6 @@ def home():
         cur = db.cursor()
         cur.execute('SELECT * FROM empresa ')
         company = cur.fetchall()
-        print(company)
         db.commit()
         return render_template('home.html', username=session['username'],companys=company)
     # User is not loggedin redirect to login page
