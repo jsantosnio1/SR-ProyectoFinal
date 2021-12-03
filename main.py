@@ -20,6 +20,8 @@ import io
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.keys import Keys
 from prediction.predictionstockmarket import predictDataSet
+from prediction.predictionstockmarket import trainPredictDataSet
+
 from sqlalchemy import create_engine
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
@@ -560,8 +562,10 @@ def getData():
         val = (empresa,sigla,name_file,exchange, sector, industry ,year ,today ,share ,average ,previous ,week ,market,ratio ,forward,earnings,annualized,dividend,dividendp,current,'activo',beta)
         cur.execute(sql, val)
         conn.commit()
+        predict(name_file, sigla)
         #getTweet(sigla)
         #convertToCSV(sigla)
+
         
 
     thread= Thread(target=getDatas)
@@ -595,17 +599,25 @@ def plot_jpeg():
                      attachment_filename='business.jpeg',
                      as_attachment=True)
 
-@app.route("/predictCompany")
-def predict():
-    sigla="INTC"+".csv"
-    ruta_data_accions="HistoricalData_1637979637603.csv"
+#@app.route("/predictCompany")
+
+
+def predict(archivo, sigla):
+    sigla=sigla+".csv"
+    ruta_data_accions="/downloads/"+archivo+sigla
     #predict=predictDataSet(ruta_data_accions)
-    predict=predictDataSet()
-    
+    predict=predictDataSet(ruta_data_accions,sigla)    
     #sentimientos=analysisBySentiments(sigla+'.csv')
     sentimientos=""
 
     return render_template("final_predict.html",predict=predict,sentimientos=sentimientos)
+
+def trainModel(archivo, sigla):
+    sigla=sigla+".csv"
+    ruta_data_accions="/downloads/"+archivo+sigla
+    train=trainPredictDataSet(ruta_data_accions,sigla)
+
+    return render_template("train_model_predict.html",training_data_len= train)
 
 def getTweet(sigla):
     import tweet_collector
