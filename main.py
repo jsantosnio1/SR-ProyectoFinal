@@ -602,7 +602,26 @@ def home():
         cur = db.cursor()
         cur.execute('SELECT * FROM empresa ')
         company = cur.fetchall()
+        
+        cur.execute('SELECT count(*) FROM acciones where id_usuario = %s',(session["id"],))
+        tiene = cur.fetchone()
+
         db.commit()
+
+        if tiene[0] > 0:
+            recomendados= hybrid()
+            arr_recomendados = []
+            db = getMysqlConnection()
+            cur = db.cursor(dictionary=True)
+            for r in recomendados:
+                cur.execute('SELECT * FROM empresa where nombre_empresa = %s',(r,))
+                data_recomendados = cur.fetchall()
+                arr_recomendados.append(data_recomendados)
+
+            db.commit()
+
+            return render_template("home.html", username=session['username'],companys=company, recomendados=arr_recomendados)
+
         return render_template('home.html', username=session['username'],companys=company)
     # User is not loggedin redirect to login page
     return redirect(url_for('login'))

@@ -26,67 +26,54 @@
     <title> Company </title>
 </head>
 <body>
-
-    <h1>Company</h1>
-    <div class="chartCard">
-        <div class="chartBox">
-          <canvas id="myChart"></canvas>
+    {% if recomendados %}
+    <br>
+    <h1>Recomendados para ti!</h1>
+    <section class="wrapper">
+        <div class="container-fluid">
+          <div class="row">
+          {% for object in recomendados%}
+                {% for company in object %}
+                
+              <div class="col-md-4">
+    
+                  <div class="card text-black card-has-bg click-col" data-toggle="modal" data-target="#modal-fullscreen-xl">
+                      <div class="card-img-overlay d-flex flex-column">
+                          <div class="card-body">
+                              <h4 class="card-title mt-0 "><a href="/getCompany/{{ company['id_empresa'] }}"> {{company["nombre_empresa"] }}</a></h4>
+                              <small><i class="far fa-clock"></i> {{company["sigla_empresa"] }}</small>
+    
+                          </div>
+                          <div class="card-footer">
+                              <div class="media">
+                                  <img class="mr-3 rounded-circle" src="/getB" alt="Generic placeholder image" style="max-width:50px">
+                                  <div class="media-body">
+                                      <h6 class="my-0 text-black d-block">Market Cap</h6>
+                                      <small>{{company["market_cap"] }}</small>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+    
+            </div>
+                {% endfor %}
+            {% endfor %}
+          </div>
         </div>
-      </div>
-
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.1.1/d3.min.js" integrity="sha512-COTaPOlz12cG4fSfcBsxZsjauBAyldqp+8FQUM/dZHm+ts/jR4AFoJhCqxy8K10Jrf3pojfsbq7fAPTb1XaVkg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-      <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-      <script>
-          let filename = '/getPlotCSV';
-          d3.csv(filename).then(function(loadedData){
-            //console.log(loadedData);
-            let data = [];
-            let labels = [];
-
-            for (let i = 0; i < loadedData.length; i++) {
-                   console.log(loadedData[i]);
-
-                   let Datea = loadedData[i].Date;
-                   labels.push(Datea);
-                   let Close = loadedData[i].Close;
-                   data.push(Close);
-            }
-
-            let options = {
-                type: 'line',
-                data:{
-                    labels: labels,
-                    datasets: [
-                        {
-                            data: data,
-                            fill: false,
-                            pointRadius: 0,
-                            pointHoverRadius: 0,
-                            borderColor: 'rgb(100,100,100)'
-                        }
-                    ]
-
-                }
-            };
-
-            const myChart = new Chart(document.getElementById('myChart'), options);
-
-          });
-
-
-      </script>
-
+      </section>
+    {% endif %}
+  <h1>Companies</h1>
   <section class="wrapper">
     <div class="container-fluid">
       <div class="row">
       {% for company in companys%}
-          <a href="/getCompany/{{ company[0] }}">
-          <div class="col-md-4" >
+          <div class="col-md-4" style="margin-top: 5%;">
 
               <div class="card text-black card-has-bg click-col" data-toggle="modal" data-target="#modal-fullscreen-xl">
                   <div class="card-img-overlay d-flex flex-column">
                       <div class="card-body">
-                          <h4 class="card-title mt-0 "<a href="/getCompany/{{ company[0] }}"> {{company[1] }}</a></h4>
+                          <h4 class="card-title mt-0"><a href="/getCompany/{{ company[0] }}"> {{company[1] }}</a></h4>
                           <small><i class="far fa-clock"></i> {{company[2] }}</small>
 
                       </div>
@@ -105,44 +92,6 @@
 
         </div>
             {% endfor %}
-        <div class="col-md-4">
-              <div class="card text-black card-has-bg click-col" data-toggle="modal" data-target="#modal-fullscreen-xl">
-                  <div class="card-img-overlay d-flex flex-column">
-                      <div class="card-body">
-                          <h4 class="card-title mt-0 "><a class="text-black" herf="#">AMAZON</a></h4>
-                          <small><i class="far fa-clock"></i> AMZN</small>
-                      </div>
-                      <div class="card-footer">
-                          <div class="media">
-                              <img class="mr-3 rounded-circle" src="/getB" alt="Generic placeholder image" style="max-width:50px">
-                              <div class="media-body">
-                                  <h6 class="my-0 text-black d-block">Market Cap</h6>
-                                  <small>1,754,274,332,342</small>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-        </div>
-        <div class="col-md-4">
-              <div class="card text-black card-has-bg click-col" data-toggle="modal" data-target="#modal-fullscreen-xl">
-                  <div class="card-img-overlay d-flex flex-column">
-                      <div class="card-body">
-                          <h4 class="card-title mt-0 "><a class="text-black" herf="#">APPLE</a></h4>
-                          <small><i class="far fa-clock"></i> AAPL</small>
-                      </div>
-                      <div class="card-footer">
-                          <div class="media">
-                              <img class="mr-3 rounded-circle" src="/getB" alt="Generic placeholder image" style="max-width:50px">
-                              <div class="media-body">
-                                  <h6 class="my-0 text-black d-block">Market Cap</h6>
-                                  <small></small>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-        </div>
       </div>
     </div>
   </section>
