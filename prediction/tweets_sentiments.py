@@ -11,13 +11,16 @@ def analysTweets(df, prefijoEmpresa):
 
     tweets = pd.read_csv(df)
     tweets.columns = ["tweet_id","writer","post_date","body","comment_num","retweet_num","like_num"]
+
     analyzer = SentimentIntensityAnalyzer()
     sentences = tweets["body"]
     sentenceSample = sentences[:10]
     sentenceSampleDf=pd.DataFrame(sentenceSample)
+
+
     # sentenceSampleDf
     def negativityCheck(sentence):
-        if(analyzer.polarity_scores(sentence)["neg"]>0.7):
+        if(analyzer.polarity_scores(sentence)["neg"]>0.05):
             return 1
         else:
             return 0
@@ -31,7 +34,7 @@ def analysTweets(df, prefijoEmpresa):
     #tweets.head(5)
 
     def positiveCheck(sentence):
-        if(analyzer.polarity_scores(sentence)["pos"]>0.7):
+        if(analyzer.polarity_scores(sentence)["pos"]>0.05):
             return 1
         else:
             return 0
@@ -42,6 +45,7 @@ def analysTweets(df, prefijoEmpresa):
     #tweets.shape
     tweets["positive_sentiment"] = sentenceSampleDf["positive"]=pd.DataFrame(sentences.apply(positiveCheck).tolist())
        #tweets.head(5)
+
     negativeTweeets = tweets.loc[tweets["negative_sentiment"]==1]
     # negativeTweeets.head(5)
     positiveTweeets = tweets.loc[tweets["positive_sentiment"]==1]
@@ -50,7 +54,6 @@ def analysTweets(df, prefijoEmpresa):
     # """AMAZON"""
     # amazonDf = pd.read_csv("/content/drive/MyDrive/UNIVERSIDAD/8vo/Sistemas de Recomendación con BigData/Tweets about top companies/AMZN.csv")
     # amazonDf.head(5)
-    amazonDf = tweets
     """Negative Tweets Amazon """
     negativeTweetsAmazon = negativeTweeets#.loc[negativeTweeets['ticker_symbol'] =="AMZN"]
     # negativeTopUsersTweetsAmazon = negativeTweeets.loc[negativeTweeets['retweet_num'] > 10]
@@ -84,6 +87,7 @@ def analysTweets(df, prefijoEmpresa):
 
     # negativeTweetsOnAmazonDateCount.head(5)
 
+
     negativeTweetsOnAmazonDateCount["countNegative"] = negativeTweetsOnAmazonDateCount["post_date"]
     negativeTweetsOnAmazonDateCount.drop("post_date",axis=1,inplace=True)
     negativeTweetsOnAmazonDateCount["post_date"] = negativeTweetsOnAmazonDateCount["index"]
@@ -92,9 +96,11 @@ def analysTweets(df, prefijoEmpresa):
     positiveTweetsOnAmazonDateCount.drop("post_date",axis=1,inplace=True)
     positiveTweetsOnAmazonDateCount["post_date"] = positiveTweetsOnAmazonDateCount["index"]
 
-    amazonInfluenceByNo= pd.merge(negativeTweetsOnAmazonDateCount,amazonDf,on="post_date",how="inner")
 
-    amazonInfluenceByYes= pd.merge(positiveTweetsOnAmazonDateCount,amazonDf,on="post_date",how="inner")
+
+    amazonInfluenceByNo= negativeTweetsOnAmazonDateCount#pd.merge(negativeTweetsOnAmazonDateCount,amazonDf,on="post_date",how="inner")
+
+    amazonInfluenceByYes= positiveTweetsOnAmazonDateCount#pd.merge(positiveTweetsOnAmazonDateCount,amazonDf,on="post_date",how="inner")
 
     # amazonInfluenceByNo.head(5)
 
@@ -103,11 +109,11 @@ def analysTweets(df, prefijoEmpresa):
 
     fig, ax = plt.subplots(figsize=(15,15))
 
-    amazonInfluenceByNo["post_date"] = pd.to_datetime(amazonInfluenceByNo["post_date"])
-    amazonInfluenceByNo = amazonInfluenceByNo.sort_values(by="post_date")
+    amazonInfluenceByNo["dateTime"] = pd.to_datetime(amazonInfluenceByNo["post_date"])
+    amazonInfluenceByNo = amazonInfluenceByNo.sort_values(by="dateTime")
 
-    amazonInfluenceByYes["post_date"] = pd.to_datetime(amazonInfluenceByYes["post_date"])
-    amazonInfluenceByYes = amazonInfluenceByYes.sort_values(by="post_date")  
+    amazonInfluenceByYes["dateTime"] = pd.to_datetime(amazonInfluenceByYes["post_date"])
+    amazonInfluenceByYes = amazonInfluenceByYes.sort_values(by="dateTime")  
 
 
     #openingValues= amazonInfluenceByNo["Open"]
@@ -115,16 +121,27 @@ def analysTweets(df, prefijoEmpresa):
     countNegativeTweet = amazonInfluenceByNo["countNegative"]
     countPositiveTweet = amazonInfluenceByYes["countPositive"]
 
-    datesNo = amazonInfluenceByNo["post_date"]
-    datesYes = amazonInfluenceByYes["post_date"]
+    datesNo = amazonInfluenceByNo["dateTime"]
+    datesYes = amazonInfluenceByYes["dateTime"]
+    print('***'*100)
+
+    print(countNegativeTweet.head(20))
+    print('***'*100)
+    print(countPositiveTweet.head(20))
+    print('***'*100)
+    print(datesNo.head(20))
+    print('***'*100)
+    print(datesYes.head(20))
+    print('***'*100)
     # ax.plot(dates,openingValues,label="open")
     # ax.plot(dates,closingValues,label="close")
-    ax.plot(datesNo,countNegativeTweet,label="N° of Negative of Tweets")
     ax.plot(datesYes,countPositiveTweet,label="N° of Positive of Tweets")
+
+    ax.plot(datesNo,countNegativeTweet,label="N° of Negative of Tweets")
 
     ax.legend()
 
-    pathImage = 'prediction/graficas/_sentiments_tweets_'+prefijoEmpresa+'.png'
-    ax.figure.savefig(pathImage)   
+    pathImage = 'prediction/graficas/sentiments_tweets_'+prefijoEmpresa+'.png'
+    ax.figure.savefig(pathImage)    
 
     return pathImage

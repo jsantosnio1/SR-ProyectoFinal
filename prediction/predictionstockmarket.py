@@ -96,7 +96,7 @@ def trainPredictDataSet(df_route, prefijoEmpresa):
 def predictDataSet(df_ruta, prefijoEmpresa):
     
     modelCompilate = load_model('prediction/models/prediction_model_'+prefijoEmpresa+'.h5')
-    df = pd.read_csv("C:\\Users\\Asus\\PycharmProjects\\SR-ProyectoFinal\\prediction\\tsla.us.txt")
+    df = pd.read_csv("C:/Users/JuanK/Documents/GitHub/SR-ProyectoFinal/prediction/tsla.us.txt")
     """ df=df.rename(columns={"Close/Last":"Close"})
     df=df.replace({'\\$':''}, regex=True)
     df['Date'] = pd.to_datetime(df['Date'])
@@ -142,7 +142,7 @@ def predictDataSet(df_ruta, prefijoEmpresa):
     plt.xlabel('Date', fontsize=14)
     plt.ylabel('Close Price USD ($)', fontsize=14)
     plt.plot(train['Close'])
-    plt.plot(valid[['Predictions']])
+    plt.plot(valid['Predictions'])
     plt.legend(['Val', 'Predictions'], loc='lower right')
     aux= int(df.shape[0])
     aux_div=int(aux/10)
