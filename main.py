@@ -83,14 +83,16 @@ def register():
     # Output message if something goes wrong...
     msg = ''
     # Check if "username", "password" and "email" POST requests exist (user submitted form)
-    if request.method == 'POST' and 'username' in request.form and 'password' in request.form and 'email' in request.form:
+    if request.method == 'POST' and 'username' in request.form and 'password' in request.form and 'email' in request.form \
+            and 'nick_name' in request.form:
         # Create variables for easy access
         username = request.form['username']
         password = request.form['password']
         email = request.form['email']
+        nick_name = request.form['nick_name']
         db = getMysqlConnection()
         cur = db.cursor(dictionary=True)
-        cur.execute('SELECT * FROM accounts WHERE username = %s', (username,))
+        cur.execute('SELECT * FROM usuario WHERE nick_name_usuario = %s', (nick_name,))
         account = cur.fetchone()
         #If account exists show error and validation checks
         if account:
@@ -103,12 +105,10 @@ def register():
             msg = 'Please fill out the form!'
         else:
             # Account doesnt exists and the form data is valid, now insert new account into accounts table
-            cur.execute('INSERT INTO accounts VALUES (NULL, %s, %s, %s)', (username, password, email,))
-            mysql.connection.commit()
+            cur.execute('INSERT INTO usuario VALUES (NULL, %s,%s, %s, %s,NULL,%s,%s)', (username,nick_name,email, password,'activo',1))
+            db.commit()
             msg = 'You have successfully registered!'
     return render_template('register.html', msg=msg)
-
-
 
 @app.route('/profile')
 def profile():
@@ -117,7 +117,7 @@ def profile():
         # We need all the account info for the user so we can display it on the profile page
         db = getMysqlConnection()
         cur = db.cursor(dictionary=True)
-        cur.execute('SELECT * FROM accounts WHERE id = %s', (session['id'],))
+        cur.execute('SELECT * FROM usuario WHERE id_usuario = %s', (session['id'],))
         account = cur.fetchone()
         # Show the profile page with account info
         return render_template('profile.html', account=account)

@@ -149,18 +149,25 @@
                       </script>
                     </div>
                   </div>
-            
-
               </div>
+
+                  <br>
+      <img width="600px" height="330px" src="{{ url_for('static', filename='graficas/prediction_model_graph_INTC.png') }}" alt="Predicción">
+     <br>
+      <img width="600px" height="330px"  src="{{ url_for('static', filename='graficas/sentiments_tweets_INTC.png') }}" alt="Sentimientos">
+<br>
+
             
         </div>
-    </div>
     <center>
-      {{predictions[0]}}
-      {{predictions[1]}}  
 
-    <button type="submit" class="boton_personalizado" onclick="comprar({{company['id_empresa']}})">Comprar</button>
-</center>
+       
+
+    <a  href="https://www.nasdaq.com/market-activity/stocks/intc" target="_blank" class="boton_personalizado" onclick="comprar({{company['id_empresa']}})">Comprar</a>
+
+  </center>
+</div>
+
 </body>
 </html>
 {% endblock %}

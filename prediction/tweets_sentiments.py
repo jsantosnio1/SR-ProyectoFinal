@@ -178,7 +178,8 @@ def analysTweets(df, prefijoEmpresa):
 
     ax.legend()
 
-    pathImage = 'prediction/graficas/sentiments_tweets_'+prefijoEmpresa+'.png'
+    pathImage = 'static/graficas/sentiments_tweets_'+prefijoEmpresa+'.png'
     ax.figure.savefig(pathImage)    
+    pathImage = pathImage.replace('static/', '')
 
     return pathImage

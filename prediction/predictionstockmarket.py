@@ -24,12 +24,14 @@ def trainPredictDataSet(df_route, prefijoEmpresa):
 
     import warnings
     warnings.filterwarnings('ignore')
+    #df = pd.read_csv(df_route)
+    
     df = pd.read_csv("C:\\Users\\Asus\\PycharmProjects\\SR-ProyectoFinal\\prediction\\tsla.us.txt")
-    """ df=df.rename(columns={"Close/Last":"Close"})
+    #df=df.rename(columns={"Close/Last":"Close"})
     df=df.replace({'\\$':''}, regex=True)
     df['Date'] = pd.to_datetime(df['Date'])
     df['Date'] = df['Date'].dt.strftime("%Y-%m-%d")
-    df= df.sort_values(by="Date") """
+    df= df.sort_values(by="Date", ascending=True)
     #df = pd.read_csv("C:/Users/JuanK/Documents/GitHub/SR-ProyectoFinal/prediction/mcft.us.txt")
 
     print(df.head())
@@ -50,8 +52,8 @@ def trainPredictDataSet(df_route, prefijoEmpresa):
     x_train = []
     y_train = []
 
-    for i in range(30, len(train_data)):
-        x_train.append(train_data[i-30:i, 0])
+    for i in range(60, len(train_data)):
+        x_train.append(train_data[i-60:i, 0])
         y_train.append(train_data[i, 0])
         if i<= 61:
             print(x_train)
@@ -68,9 +70,9 @@ def trainPredictDataSet(df_route, prefijoEmpresa):
 
     # Construye el modelo LSTM
     model = Sequential()
-    model.add(LSTM(128, return_sequences=True, input_shape= (x_train.shape[1], 1)))
+    model.add(LSTM(168, return_sequences=True, input_shape= (x_train.shape[1], 1)))
     model.add(LSTM(64, return_sequences=False))
-    model.add(Dense(25))
+    model.add(Dense(65))
     model.add(Dense(1))
 
     # Compilar la modelo
@@ -96,12 +98,22 @@ def trainPredictDataSet(df_route, prefijoEmpresa):
 def predictDataSet(df_ruta, prefijoEmpresa):
     
     modelCompilate = load_model('prediction/models/prediction_model_'+prefijoEmpresa+'.h5')
-    df = pd.read_csv("C:/Users/JuanK/Documents/GitHub/SR-ProyectoFinal/prediction/tsla.us.txt")
-    """ df=df.rename(columns={"Close/Last":"Close"})
+    df = pd.read_csv("C:/Users/JuanK/Documents/GitHub/SR-ProyectoFinal/prediction/mcft.us.txt")
+    #df = pd.read_csv(df_ruta)
+    #df=df.rename(columns={"Close/Last":"Close"})
     df=df.replace({'\\$':''}, regex=True)
+    print(df.head(60))
     df['Date'] = pd.to_datetime(df['Date'])
     df['Date'] = df['Date'].dt.strftime("%Y-%m-%d")
-    df= df.sort_values(by="Date") """
+    #df= df.sort_values(by="Date", ascending=True)
+    print('-'*600)
+    # plt.figure(figsize=(16,6))
+    # plt.title('Close Price History')
+    # plt.plot(df['Close'])
+    # plt.xlabel('Date', fontsize=18)
+    # plt.ylabel('Close Price USD ($)', fontsize=18)
+    # plt.show()
+    print(df.head(60))
 
     #df1 = pd.read_csv("C:/Users/JuanK/Documents/GitHub/SR-ProyectoFinal/prediction/tsla.us.txt")
     data1 = df.filter(['Close'])
@@ -111,18 +123,13 @@ def predictDataSet(df_ruta, prefijoEmpresa):
     # Obtenga el número de filas en las que entrenar el modelo
     training_data_len1 = int(np.ceil( len(dataset1)*.85  ))
     #scaled_data1 = scaler.fit_transform(dataset1)
-    test_data = scaled_data[training_data_len1 - 30: , :]
+    test_data = scaled_data[training_data_len1 - 60: , :]
 
     # Cree los conjuntos de datos x_test y y_test
     x_test = []
-    for i in range(30, len(test_data)):
-        x_test.append(test_data[i-30:i, 0])
+    for i in range(60, len(test_data)):
+        x_test.append(test_data[i-60:i, 0])
 
-
-    x_test = []
-    for i in range(30, len(test_data)):
-        x_test.append(test_data[i-30:i, 0])        
-    # Convierte los datos en una matriz numpy
     x_test = np.array(x_test)
     # Remodelar los datos
     x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], 1 ))
@@ -131,13 +138,13 @@ def predictDataSet(df_ruta, prefijoEmpresa):
     predictions = scaler.inverse_transform(predictions)
 
     # Obtenga la raíz del error cuadrático medio (RMSE)
-    # rmse = np.sqrt(np.mean(((predictions - y_test) ** 2)))
+    # rmse = np.sqrt(np.mean(((predictions - y_test) ** 6)))
     # rmse
     train = data1[:training_data_len1]
     valid = data1[training_data_len1 :]
     valid['Predictions'] = predictions
     # Visualiza los datos
-    plt.figure(figsize=(20,4))
+    plt.figure(figsize=(60,4))
     plt.title('Predicción')
     plt.xlabel('Date', fontsize=14)
     plt.ylabel('Close Price USD ($)', fontsize=14)
@@ -147,12 +154,12 @@ def predictDataSet(df_ruta, prefijoEmpresa):
     aux= int(df.shape[0])
     aux_div=int(aux/10)
     plt.xticks(np.arange(0,aux, aux_div), df['Date'][0:aux-1:aux_div])
-    plt.yticks(np.arange(0,aux, aux_div), df['Close'][0:aux-1:aux_div])
+    plt.yticks(df['Close'][0:aux-1:aux_div])
     #plt.show()
-    pathImage = 'prediction/graficas/prediction_model_graph_'+prefijoEmpresa+'.png'
+    pathImage = 'static/graficas/prediction_model_graph_'+prefijoEmpresa+'.png'
     plt.savefig(pathImage)   
-    img = plt.imread(pathImage)
-    print(df.head(5))
-
+    # img = plt.imread(pathImage)
+    # print(df.head(5))
+    pathImage = pathImage.replace('static/', '')
     #valid
-    return img
+    return pathImage
